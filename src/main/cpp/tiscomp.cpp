@@ -7,6 +7,11 @@ void setnil(lua_State *L, const char* s) {
 	lua_setfield(L, -2, s);
 }
 
+void setint(lua_State *L, const char* s, int i) {
+	lua_pushinteger(L, i);
+	lua_setfield(L, -2, s);
+}
+
 int main()
 {
 	lua_State *L;
@@ -90,6 +95,14 @@ int main()
 
 	lua_setfield(L, -2, "loaded");
 	lua_setfield(L, -2, "package");
+
+	//TIS-100 constants
+	setint(L, "TITLE_COMPUTE", 1000);
+	setint(L, "TITLE_MEMORY", 1001);
+	setint(L, "TITLE_DAMAGED", 1002);
+	setint(L, "STREAM_INPUT", 2000);
+	setint(L, "STREAM_OUTPUT", 2001);
+	setint(L, "STREAM_IMAGE", 2002);
 
 	lua_settop(L, 0);
 
