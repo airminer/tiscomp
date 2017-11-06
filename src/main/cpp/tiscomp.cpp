@@ -2,6 +2,11 @@
 #include <stdio.h>
 #include <lua.hpp>
 
+void setnil(lua_State *L, const char* s) {
+	lua_pushnil(L);
+	lua_setfield(L, -2, s);
+}
+
 int main()
 {
 	lua_State *L;
@@ -10,64 +15,29 @@ int main()
 
 	//luaL_openlibs(L);
 
+	lua_checkstack(L, 7);
+
 	//Base library
 	luaL_requiref(L, "base", luaopen_base, false);
 
-	lua_pushstring(L, "dofile");
-	lua_pushnil(L);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "load");
-	lua_pushnil(L);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "loadfile");
-	lua_pushnil(L);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "loadstring");
-	lua_pushnil(L);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "getmetatable");
-	lua_pushnil(L);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "setmetatable");
-	lua_pushnil(L);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "rawequal");
-	lua_pushnil(L);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "rawget");
-	lua_pushnil(L);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "rawset");
-	lua_pushnil(L);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "rawlen");
-	lua_pushnil(L);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "pcall");
-	lua_pushnil(L);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "xpcall");
-	lua_pushnil(L);
-	lua_settable(L, -3);
+	setnil(L, "dofile");
+	setnil(L, "load");
+	setnil(L, "loadfile");
+	setnil(L, "loadstring");
+	setnil(L, "getmetatable");
+	setnil(L, "setmetatable");
+	setnil(L, "rawequal");
+	setnil(L, "rawget");
+	setnil(L, "rawset");
+	setnil(L, "rawlen");
+	setnil(L, "pcall");
+	setnil(L, "xpcall");
 
 	//package.loaded
-	lua_pushstring(L, "package");
 	lua_createtable(L, 0, 1);
-	lua_pushstring(L, "loaded");
 	lua_createtable(L, 0, 4);
 
-	//Other packages
+	//string
 	lua_pushstring(L, "string");
 
 	if (luaL_loadstring(L,
@@ -93,35 +63,33 @@ int main()
 		exit(1);
 	}
 
+	//set metatble for strings
 	lua_getmetatable(L, -2);
-	lua_pushstring(L, "__index");
-	lua_pushvalue(L, -3);
-	lua_settable(L, -3);
+	lua_pushvalue(L, -2);
+	lua_setfield(L, -2, "__index");
 	lua_remove(L, -1);
+
 	lua_settable(L, -3);
 
-	lua_pushstring(L, "table");
+	//table
 	luaL_requiref(L, "table", luaopen_table, true);
 
 	//Moonsharp alias
-	lua_pushstring(L, "pack");
-	lua_pushvalue(L, -1);
-	lua_gettable(L, -3);
-	lua_settable(L, -9);
+	lua_getfield(L, -1, "pack");
+	lua_setfield(L, -5, "pack");
 
-	lua_settable(L, -3);
+	lua_setfield(L, -2, "table");
 
-
-	lua_pushstring(L, "math");
+	//math
 	luaL_requiref(L, "math", luaopen_math, true);
-	lua_settable(L, -3);
+	lua_setfield(L, -2, "math");
 
-	lua_pushstring(L, "bit32");
+	//bit32
 	luaL_requiref(L, "bit32", luaopen_bit32, true);
-	lua_settable(L, -3);
+	lua_setfield(L, -2, "bit32");
 
-	lua_settable(L, -3);
-	lua_settable(L, -3);
+	lua_setfield(L, -2, "loaded");
+	lua_setfield(L, -2, "package");
 
 	lua_settop(L, 0);
 
