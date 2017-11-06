@@ -106,9 +106,9 @@ int main(int argc, char* argv[]) {
 	lua_setfield(L, -2, "package");
 
 	//TIS-100 constants
-	setint(L, "TITLE_COMPUTE", 1000);
-	setint(L, "TITLE_MEMORY", 1001);
-	setint(L, "TITLE_DAMAGED", 1002);
+	setint(L, "TILE_COMPUTE", 1000);
+	setint(L, "TILE_MEMORY", 1001);
+	setint(L, "TILE_DAMAGED", 1002);
 	setint(L, "STREAM_INPUT", 2000);
 	setint(L, "STREAM_OUTPUT", 2001);
 	setint(L, "STREAM_IMAGE", 2002);
