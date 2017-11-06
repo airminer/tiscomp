@@ -69,7 +69,34 @@ int main()
 
 	//Other packages
 	lua_pushstring(L, "string");
-	luaL_requiref(L, "string", luaopen_string, true);
+
+	if (luaL_loadstring(L,
+		"string = {};"
+		"for k,v in pairs(...) do;"
+			"string[k] = function(...);"
+				"print(\"WARN: string.\"..k..\"() called!\");"
+				"string[k] = v;"
+				"return v(...);"
+			"end;"
+		"end;"
+		"return string;"
+	)) {
+		fprintf(stderr, "Couldn't load string: %s\n", lua_tostring(L, -1));
+		exit(1);
+	}
+
+	luaL_requiref(L, "string", luaopen_string, false);
+
+	if (lua_pcall(L, 1, 1, 0)) {
+		fprintf(stderr, "Failed to run script: %s\n", lua_tostring(L, -1));
+		exit(1);
+	}
+
+	lua_getmetatable(L, -2);
+	lua_pushstring(L, "__index");
+	lua_pushvalue(L, -3);
+	lua_settable(L, -3);
+	lua_remove(L, -1);
 	lua_settable(L, -3);
 
 	lua_pushstring(L, "table");
@@ -97,14 +124,12 @@ int main()
 
 	lua_settop(L, 0);
 
-	int status = luaL_loadfile(L, "test.lua");
-	if (status) {
+	if (luaL_loadfile(L, "test.lua")) {
 		fprintf(stderr, "Couldn't load file: %s\n", lua_tostring(L, -1));
 		exit(1);
 	}
 
-	int result = lua_pcall(L, 0, LUA_MULTRET, 0);
-	if (result) {
+	if (lua_pcall(L, 0, LUA_MULTRET, 0)) {
 		fprintf(stderr, "Failed to run script: %s\n", lua_tostring(L, -1));
 		exit(1);
 	}
