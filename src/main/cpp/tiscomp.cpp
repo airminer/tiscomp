@@ -12,8 +12,17 @@ void setint(lua_State *L, const char* s, int i) {
 	lua_setfield(L, -2, s);
 }
 
-int main()
-{
+int main(int argc, char* argv[]) {
+	char* file;
+
+	if (argc < 2) {
+		std::cerr << "No file provided.\n";
+		std::cerr << "Usage: tiscomp FILE\n";
+		exit(1);
+	} else {
+		file = argv[1];
+	}
+
 	lua_State *L;
 
 	L = luaL_newstate();
@@ -106,7 +115,7 @@ int main()
 
 	lua_settop(L, 0);
 
-	if (luaL_loadfile(L, "test.lua")) {
+	if (luaL_loadfile(L, file)) {
 		fprintf(stderr, "Couldn't load file: %s\n", lua_tostring(L, -1));
 		exit(1);
 	}
