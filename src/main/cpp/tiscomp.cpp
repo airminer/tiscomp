@@ -71,14 +71,15 @@ int main()
 	lua_pushstring(L, "string");
 
 	if (luaL_loadstring(L,
-		"string = {};"
+		"local s = {};"
 		"for k,v in pairs(...) do;"
-			"string[k] = function(...);"
+			"s[k] = function(...);"
 				"print(\"WARN: string.\"..k..\"() called!\");"
-				"string[k] = v;"
+				"s[k] = v;"
 				"return v(...);"
 			"end;"
 		"end;"
+		"string = s;"
 		"return string;"
 	)) {
 		fprintf(stderr, "Couldn't load string: %s\n", lua_tostring(L, -1));
