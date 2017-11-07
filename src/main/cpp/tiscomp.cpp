@@ -1,13 +1,20 @@
-#include <iostream>
 #include <stdio.h>
+#include <stdlib.h>
 #include <lua.hpp>
+
+enum TIS_TILE {
+	TILE_COMPUTE = 1000,
+	TILE_MEMORY = 1001,
+	TILE_DAMAGED = 1002,
+	TILE_JOURNAL = 1003
+};
 
 void setnil(lua_State *L, const char* s) {
 	lua_pushnil(L);
 	lua_setfield(L, -2, s);
 }
 
-void setint(lua_State *L, const char* s, int i) {
+void setint(lua_State *L, const char* s, lua_Integer i) {
 	lua_pushinteger(L, i);
 	lua_setfield(L, -2, s);
 }
@@ -16,8 +23,8 @@ int main(int argc, char* argv[]) {
 	char* file;
 
 	if (argc < 2) {
-		std::cerr << "No file provided.\n";
-		std::cerr << "Usage: tiscomp FILE\n";
+		fprintf(stderr, "No file provided.\n");
+		fprintf(stderr, "Usage: tiscomp FILE\n");
 		exit(1);
 	} else {
 		file = argv[1];
@@ -106,23 +113,85 @@ int main(int argc, char* argv[]) {
 	lua_setfield(L, -2, "package");
 
 	//TIS-100 constants
-	setint(L, "TILE_COMPUTE", 1000);
-	setint(L, "TILE_MEMORY", 1001);
-	setint(L, "TILE_DAMAGED", 1002);
+	setint(L, "TILE_COMPUTE", TILE_COMPUTE);
+	setint(L, "TILE_MEMORY", TILE_MEMORY);
+	setint(L, "TILE_DAMAGED", TILE_DAMAGED);
+	setint(L, "TILE_JOURNAL", TILE_JOURNAL);
 	setint(L, "STREAM_INPUT", 2000);
 	setint(L, "STREAM_OUTPUT", 2001);
 	setint(L, "STREAM_IMAGE", 2002);
-
-	lua_settop(L, 0);
 
 	if (luaL_loadfile(L, file)) {
 		fprintf(stderr, "Couldn't load file: %s\n", lua_tostring(L, -1));
 		exit(1);
 	}
 
-	if (lua_pcall(L, 0, LUA_MULTRET, 0)) {
+	if (lua_pcall(L, 0, 0, 0)) {
 		fprintf(stderr, "Failed to run script: %s\n", lua_tostring(L, -1));
 		exit(1);
+	}
+
+	lua_getfield(L, -1, "get_layout");
+	if(lua_pcall(L, 0, 1, 0)) {
+		fprintf(stderr, "Failed to call get_layout(): %s\n", lua_tostring(L, -1));
+		exit(1);
+	}
+
+	if (!lua_istable(L, -1)) {
+		fprintf(stderr, "Failed to get layout: get_layout() returned a value of type %s\n", lua_typename(L, lua_type(L, -1)));
+		exit(1);
+	}
+
+	size_t l;
+
+	if ((l = lua_rawlen(L, -1)) != 12) {
+		fprintf(stderr, "Failed to get layout: get_layout() returned a table of length %d\n", l);
+		exit(1);
+	}
+
+	int c = 0;
+	lua_Integer compute[12];
+	int m = 0;
+	lua_Integer memory[12];
+
+	for (int i = 1; i <= 12; i++) {
+		lua_rawgeti(L, -1, i);
+		if (!lua_isnumber(L, -1)) {
+			fprintf(stderr, "Failed to get layout: element %d of get_layout() is of type %s\n", i, lua_typename(L, lua_type(L, -1)));
+			exit(1);
+		}
+		lua_Integer tile = lua_tointeger(L, -1);
+		lua_remove(L, -1);
+
+		if (tile < TILE_COMPUTE || tile > TILE_JOURNAL) {
+			fprintf(stderr, "Failed to get layout: element %d of get_layout() is not a valid tile value(%d)\n", i, tile);
+			exit(1);
+		}
+
+		switch (tile) {
+		case TILE_COMPUTE:
+			compute[c++] = i; break;
+		case TILE_MEMORY:
+			memory[m++] = i; break;
+		}
+	}
+
+	lua_settop(L, 0);
+
+	if (c > 0) {
+		printf("Compute tiles:\n0:%d", compute[0]);
+		for (int i = 1; i < c; i++) {
+			printf(" %d:%d", i, compute[i]);
+		}
+		printf("\n");
+	}
+
+	if (m > 0) {
+		printf("Memory tiles:\n%d", memory[0]);
+		for (int i = 1; i < m; i++) {
+			printf(" %d", memory[i]);
+		}
+		printf("\n");
 	}
 
     return 0;
