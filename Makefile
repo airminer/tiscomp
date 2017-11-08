@@ -3,11 +3,13 @@ CXX= $(ARCH)g++
 CXXFLAGS= -O2 -Wall -I/cygdrive/c/lua/lua-5.2.4/src
 LDFLAGS= -L/cygdrive/c/lua/lua-5.2.4/src
 LIBS= -llua52
+MAIN=src/main/cpp
 
 RM= rm -f
+SED= sed
 
-TISCOMP_T=tiscomp.exe
-TISCOMP_O=tiscomp.o
+TISCOMP_T=$(MAIN)/tiscomp.exe
+TISCOMP_O=$(MAIN)/tiscomp.o
 
 all: $(TISCOMP_T)
 
@@ -18,8 +20,8 @@ clean:
 	$(RM) $(TISCOMP_T) $(TISCOMP_O)
 
 depend:
-	@$(CXX) $(CFLAGS) -MM *.cpp
+	@$(CXX) $(CFLAGS) -MM $(MAIN)/*.cpp | $(SED) 's%\(^\|$(MAIN)/\)%$$(MAIN)/%g'
 
 .PHONY: all clean depend
 
-tiscomp.o: tiscomp.cpp
+$(MAIN)/tiscomp.o: $(MAIN)/tiscomp.cpp
