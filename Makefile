@@ -10,6 +10,7 @@ SED= sed
 
 TISCOMP_T=$(MAIN)/tiscomp.exe
 TISCOMP_O=$(MAIN)/tiscomp.o
+TISCOMP_D=$(MAIN)/tiscomp.d
 
 all: $(TISCOMP_T)
 
@@ -17,11 +18,16 @@ $(TISCOMP_T): $(TISCOMP_O)
 	$(CXX) -o $@ $(LDFLAGS) $(TISCOMP_O) $(LIBS)
 
 clean:
-	$(RM) $(TISCOMP_T) $(TISCOMP_O)
+	$(RM) $(TISCOMP_T) $(TISCOMP_O) $(wildcard $(TISCOMP_D)*)
 
-depend:
-	@$(CXX) $(CFLAGS) -MM $(MAIN)/*.cpp | $(SED) 's%\(^\|$(MAIN)/\)%$$(MAIN)/%g'
+%.d: %.cpp
+	@$(RM) $@ && \
+	$(CXX) -M $(CPPFLAGS) $(CXXFLAGS) $< > $@.$$$$ && \
+	$(SED) 's,\($(*F)\)\.o[ :]*,$*.o $@ : ,g' < $@.$$$$ > $@ && \
+	$(RM) $@.$$$$
 
 .PHONY: all clean depend
 
-$(MAIN)/tiscomp.o: $(MAIN)/tiscomp.cpp
+ifneq ($(MAKECMDGOALS),clean)
+include $(TISCOMP_D)
+endif
