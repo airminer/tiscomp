@@ -1,16 +1,17 @@
 ARCH=i686-w64-mingw32-
-CXX= $(ARCH)g++
+CXX=$(ARCH)g++
 CXXFLAGS= -O2 -Wall -I/cygdrive/c/lua/lua-5.2.4/src
 LDFLAGS= -L/cygdrive/c/lua/lua-5.2.4/src
 LIBS= -llua52
 MAIN=src/main/cpp
+BISON=bison
+FLEX=flex
 
 RM= rm -f
 SED= sed
 
 TISCOMP_T=$(MAIN)/tiscomp.exe
-TISCOMP_O=$(MAIN)/tiscomp.o
-TISCOMP_D=$(MAIN)/tiscomp.d
+TISCOMP_O=$(MAIN)/tiscomp.o $(MAIN)/save.tab.o $(MAIN)/save.yy.o
 
 all: $(TISCOMP_T)
 
@@ -18,16 +19,21 @@ $(TISCOMP_T): $(TISCOMP_O)
 	$(CXX) -o $@ $(LDFLAGS) $(TISCOMP_O) $(LIBS)
 
 clean:
-	$(RM) $(TISCOMP_T) $(TISCOMP_O) $(wildcard $(TISCOMP_D)*)
+	$(RM) $(TISCOMP_T) $(TISCOMP_O) $(MAIN)/save.tab.cpp $(MAIN)/save.tab.h $(MAIN)/save.yy.cpp
 
-%.d: %.cpp
-	@$(RM) $@ && \
-	$(CXX) -M $(CPPFLAGS) $(CXXFLAGS) $< > $@.$$$$ && \
-	$(SED) 's,\($(*F)\)\.o[ :]*,$*.o $@ : ,g' < $@.$$$$ > $@ && \
-	$(RM) $@.$$$$
+%.o: %.cpp
+	$(CXX) -o $@ $(CPPFLAGS) $(CXXFLAGS) -c $*.cpp
+
+%.tab.cpp %.tab.h: %.y
+	$(BISON) -o $*.tab.cpp --defines=$*.tab.h $*.y
+
+%.yy.cpp: %.l
+	 $(FLEX) -o $@ $*.l
 
 .PHONY: all clean depend
 
-ifneq ($(MAKECMDGOALS),clean)
-include $(TISCOMP_D)
-endif
+.PRECIOUS: %.tab.cpp %.yy.cpp
+
+.SUFFIXES:
+
+$(MAIN)/save.yy.o : $(MAIN)/save.tab.h

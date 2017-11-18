@@ -1,2 +1,5 @@
+*.tab.cpp
+*.tab.h
+*.yy.cpp
 *.o
 *.exe
