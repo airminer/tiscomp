@@ -1,13 +1,14 @@
 %{
-    #include <cstdio>
+    #include <stdio.h>
+    #include <stdlib.h>
 
     extern "C" int yylex();
     extern "C" int yyparse();
-    //extern "C" FILE *yyin;
 
     void yyerror(const char *s);
 
-    int corenum = 0;
+    int corenum = -1;
+
 %}
 
 %union {
@@ -18,27 +19,14 @@
 %token <ival> INT
 %token ENDL
 %token <sval> LABEL
-%token MOV
-%token NOP
-%token SWP
-%token SAV
-%token NEG
-%token ADD
-%token SUB
-%token JRO
-%token JMP
-%token JEZ
-%token JNZ
-%token JGZ
-%token JLZ
-%token ACC
-%token NIL
-%token LEFT
-%token RIGHT
-%token UP
-%token DOWN
-%token ANY
-%token LAST
+%token <sval> MOV
+%token <sval> INSTR0
+%token <sval> INSTR1
+%token <sval> INSTRL
+%token <sval> REG
+
+%type <sval> src
+
 %%
 cores:
     cores core
@@ -46,7 +34,7 @@ cores:
 core:
     corenum lines ENDL
 corenum:
-    '@' INT ENDL { if ($2 == corenum + 1) corenum++; else yyerror("Non-consecutive core number");};
+    '@' INT ENDL { if ($2 == corenum + 1) printf("Core %d:\n", corenum++); else yyerror("Non-consecutive core number");};
 lines:
     lines line
   | line;
@@ -56,24 +44,11 @@ line:
   | LABEL ':' instr ENDL
   | ENDL;
 instr:
-    instr0
-  | instr1 src
-  | instrL LABEL
-  | MOV src reg;
-instr0:
-    NOP | SWP | SAV | NEG;
-instr1:
-    ADD | SUB | JRO;
-instrL:
-    JMP | JEZ | JNZ | JGZ | JLZ;
-reg:
-    ACC | NIL | LEFT | RIGHT | UP | DOWN | ANY | LAST;
+    INSTR0
+  | INSTR1 src
+  | INSTRL LABEL
+  | MOV src REG { printf("%s --> %s\n", $2, $3); };
 src:
-    reg
-  | INT;
+    REG
+  | INT { char* str = (char*) malloc(5); $$ = itoa($1, str, 10); };
 %%
-void yyerror(const char *s) {
-	printf("Parse error: %s",s);
-	// might as well halt now:
-	exit(-1);
-}

@@ -11,12 +11,15 @@ RM= rm -f
 SED= sed
 
 TISCOMP_T=$(MAIN)/tiscomp.exe
-TISCOMP_O=$(MAIN)/tiscomp.o $(MAIN)/save.tab.o $(MAIN)/save.yy.o
+TISCOMP_O=$(MAIN)/tiscomp.o
 
 all: $(TISCOMP_T)
 
 $(TISCOMP_T): $(TISCOMP_O)
 	$(CXX) -o $@ $(LDFLAGS) $(TISCOMP_O) $(LIBS)
+
+$(MAIN)/savetest.exe: $(MAIN)/savetest.o $(MAIN)/save.tab.o $(MAIN)/save.yy.o
+	$(CXX) -o $@ $(MAIN)/savetest.o $(MAIN)/save.tab.o $(MAIN)/save.yy.o
 
 clean:
 	$(RM) $(TISCOMP_T) $(TISCOMP_O) $(MAIN)/save.tab.cpp $(MAIN)/save.tab.h $(MAIN)/save.yy.cpp
