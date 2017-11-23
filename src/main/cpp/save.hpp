@@ -13,20 +13,28 @@ enum Reg {
     LAST = 1007
 };
 
+enum InstrType {
+	NOP, SWP, SAV, NEG, ADD, SUB, JRO, JMP, JEZ, JNZ, JGZ, JLZ, MOV
+};
+
 struct Instr {
+    int line;
     int type;
     int src;
     int dest;
     int label;
+    Instr(int, int, int, int, int);
 };
 
 extern "C" int yylex();
 extern "C" int yyparse();
 
-extern int corenum, instrn;
+extern int corenum, instrn, linenum;
 
-void yyerror(const char *s);
+void yyerror(const char*, ...);
+void lineerror(int, const char*, ...);
 
-void pushLabel(char* lc);
+void pushLabel(char*);
 void popLabels();
-void pushJum(char* lc, Instr* i);
+void clearLabels();
+void pushJump(char*, int);

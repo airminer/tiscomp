@@ -1,7 +1,10 @@
 #include <unordered_map>
 #include <vector>
 #include <algorithm>
+#include <cctype>
+#include <cstring>
 #include "save.hpp"
+#include "save.tab.h"
 
 int corenum = -1;
 
@@ -9,32 +12,59 @@ int instrn = 0;
 
 std::unordered_map<std::string, int> labels;
 std::vector<std::string> floating;
-std::unordered_map<std::string, Instr*> unresolved;
+std::unordered_map<std::string, std::vector<Instr*>> unresolved;
+
+std::vector<Instr> core;
+
+Instr::Instr(int line, int type, int src, int dest, int label) : line(line),  type(type), src(src), dest(dest), label(label) {}
 
 void pushLabel(char* lc) {
 	std::string l(lc);
 	if (labels.count(l) || std::find(floating.begin(), floating.end(), l) != floating.end()) {
-		yyerror("Label %s is already defined");
+		yyerror("Label %s is already defined", lc);
 	} else {
 		floating.push_back(l);
 	}
 }
 
 void popLabels() {
-    for(std::string l : floating) {
-		labels[l] = instrn;
-		if (unresolved.count(l)) {
-			unresolved[l]->label = instrn;
-			unresolved.erase(l);
-		}
+    if(!floating.empty()) {
+        for(std::string l : floating) {
+            printf("%s --> %d\n", l.c_str(), instrn);
+            labels[l] = instrn;
+            if (unresolved.count(l)) {
+				for (Instr* i : unresolved[l]) {
+					i->label = instrn;
+				}
+                unresolved.erase(l);
+            }
+        }
+        floating.clear();
     }
 }
 
-void pushJump(char* lc, Instr* i) {
+void clearLabels() {
+	instrn = 0;
+	popLabels();
+	if (!unresolved.empty()) {
+		std::string l = "";
+		for (std::pair<std::string, std::vector<Instr*>> e : unresolved) {
+			lineerror(e.second.front()->line, "Label %s is undefined\n", e.first.c_str());
+		}
+		exit(1);
+	} else {
+		labels.clear();
+	}
+}
+
+void pushJump(char* lc, int type) {
+    printf("JMPLINE: %d\n", linenum);
+	core.emplace_back(linenum, type, 0, 0, 0);
+	Instr* i = &core.back();
 	std::string l(lc);
 	if (labels.count(l)) {
 		i->label = labels[l];
 	} else {
-		unresolved[l] = i;
+		unresolved[l].push_back(i);
 	}
 }

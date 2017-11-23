@@ -1,6 +1,6 @@
-ARCH=i686-w64-mingw32-
+ARCH=
 CXX=$(ARCH)g++
-CXXFLAGS= -O2 -Wall -I/cygdrive/c/lua/lua-5.2.4/src
+CXXFLAGS= -g -O2 -Wall -I/cygdrive/c/lua/lua-5.2.4/src
 LDFLAGS= -L/cygdrive/c/lua/lua-5.2.4/src
 LIBS= -llua52
 MAIN=src/main/cpp
@@ -41,4 +41,4 @@ clean:
 .SUFFIXES:
 
 $(MAIN)/save.yy.o : $(MAIN)/save.tab.h
-$(MAIN)/save.tab.o : $(MAIN)/save.hpp
+$(MAIN)/save.tab.o  $(MAIN)/save.o : $(MAIN)/save.hpp
