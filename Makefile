@@ -18,11 +18,12 @@ all: $(TISCOMP_T)
 $(TISCOMP_T): $(TISCOMP_O)
 	$(CXX) -o $@ $(LDFLAGS) $(TISCOMP_O) $(LIBS)
 
-$(MAIN)/savetest.exe: $(MAIN)/savetest.o $(MAIN)/save.tab.o $(MAIN)/save.yy.o
-	$(CXX) -o $@ $(MAIN)/savetest.o $(MAIN)/save.tab.o $(MAIN)/save.yy.o
+$(MAIN)/savetest.exe: $(MAIN)/savetest.o $(MAIN)/save.tab.o $(MAIN)/save.yy.o $(MAIN)/save.o
+	$(CXX) -o $@ $(MAIN)/savetest.o $(MAIN)/save.tab.o $(MAIN)/save.yy.o $(MAIN)/save.o
 
 clean:
-	$(RM) $(TISCOMP_T) $(TISCOMP_O) $(MAIN)/save.tab.cpp $(MAIN)/save.tab.h $(MAIN)/save.yy.cpp
+	$(RM) $(TISCOMP_T) $(TISCOMP_O) $(MAIN)/save.tab.cpp $(MAIN)/save.tab.h $(MAIN)/save.yy.cpp \
+        $(MAIN)/save.o $(MAIN)/save.yy.o $(MAIN)/save.tab.o $(MAIN)/savetest.o $(MAIN)/savetest.exe
 
 %.o: %.cpp
 	$(CXX) -o $@ $(CPPFLAGS) $(CXXFLAGS) -c $*.cpp
@@ -40,3 +41,4 @@ clean:
 .SUFFIXES:
 
 $(MAIN)/save.yy.o : $(MAIN)/save.tab.h
+$(MAIN)/save.tab.o : $(MAIN)/save.hpp

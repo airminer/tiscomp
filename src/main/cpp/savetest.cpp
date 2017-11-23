@@ -1,12 +1,19 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstdarg>
 
 extern "C" int yyparse();
 extern "C" FILE *yyin;
 extern int linenum;
 
+void yyerror(const char *s) {
+	printf(s);
+}
+
 int main(int argc, char* argv[]) {
     // open a file handle to a particular file:
+    fprintf(stderr, "TEST");
+    yyerror("TEST1");
 	FILE *myfile = fopen("save.txt", "r");
 	// make sure it's valid:
 	if (!myfile) {
@@ -21,10 +28,4 @@ int main(int argc, char* argv[]) {
 		yyparse();
 	} while (!feof(yyin));
 
-}
-
-void yyerror(const char *s) {
-	printf("Parse error at line %d: %s",linenum, s);
-	// might as well halt now:
-	exit(-1);
 }
