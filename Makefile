@@ -2,7 +2,7 @@ ARCH=
 CXX=$(ARCH)g++
 CXXFLAGS= -g -O2 -Wall -I/cygdrive/c/lua/lua-5.2.4/src
 LDFLAGS= -L/cygdrive/c/lua/lua-5.2.4/src
-LIBS= -llua52
+LIBS= -llua
 MAIN=src/main/cpp
 BISON=bison
 FLEX=flex
@@ -19,7 +19,7 @@ $(TISCOMP_T): $(TISCOMP_O)
 	$(CXX) -o $@ $(CXXFLAGS) $(LDFLAGS) $(TISCOMP_O) $(LIBS)
 
 $(MAIN)/savetest.exe: $(MAIN)/savetest.o $(MAIN)/save.tab.o $(MAIN)/save.yy.o $(MAIN)/save.o
-	$(CXX) -o $@ $(MAIN)/savetest.o $(MAIN)/save.tab.o $(MAIN)/save.yy.o $(MAIN)/save.o
+	$(CXX) -o $@ $(CXXFLAGS) $(LDFLAGS) $(MAIN)/savetest.o $(MAIN)/save.tab.o $(MAIN)/save.yy.o $(MAIN)/save.o
 
 clean:
 	$(RM) $(TISCOMP_T) $(TISCOMP_O) $(MAIN)/save.tab.cpp $(MAIN)/save.tab.h $(MAIN)/save.yy.cpp \
