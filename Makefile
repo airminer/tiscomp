@@ -16,7 +16,7 @@ TISCOMP_O=$(MAIN)/tiscomp.o
 all: $(TISCOMP_T)
 
 $(TISCOMP_T): $(TISCOMP_O)
-	$(CXX) -o $@ $(LDFLAGS) $(TISCOMP_O) $(LIBS)
+	$(CXX) -o $@ $(CXXFLAGS) $(LDFLAGS) $(TISCOMP_O) $(LIBS)
 
 $(MAIN)/savetest.exe: $(MAIN)/savetest.o $(MAIN)/save.tab.o $(MAIN)/save.yy.o $(MAIN)/save.o
 	$(CXX) -o $@ $(MAIN)/savetest.o $(MAIN)/save.tab.o $(MAIN)/save.yy.o $(MAIN)/save.o

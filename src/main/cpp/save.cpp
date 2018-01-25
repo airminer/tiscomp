@@ -14,7 +14,7 @@ std::unordered_map<std::string, int> labels;
 std::vector<std::string> floating;
 std::unordered_map<std::string, std::vector<Instr*>> unresolved;
 
-std::vector<Instr> core;
+std::vector<Instr*> core;
 
 Instr::Instr(int line, int type, int src, int dest, int label) : line(line),  type(type), src(src), dest(dest), label(label) {}
 
@@ -46,10 +46,16 @@ void popLabels() {
 void clearLabels() {
 	instrn = 0;
 	popLabels();
+	printf("COREDUMP\n");
+	for (Instr* i : core) {
+		printf("%d:JMP %d\n", i->line, i->label);
+	}
 	if (!unresolved.empty()) {
 		std::string l = "";
 		for (std::pair<std::string, std::vector<Instr*>> e : unresolved) {
-			lineerror(e.second.front()->line, "Label %s is undefined\n", e.first.c_str());
+			for (Instr* i : e.second) {
+				lineerror(i->line, "Label %s is undefined\n", e.first.c_str());
+			}
 		}
 		exit(1);
 	} else {
@@ -59,8 +65,8 @@ void clearLabels() {
 
 void pushJump(char* lc, int type) {
     printf("JMPLINE: %d\n", linenum);
-	core.emplace_back(linenum, type, 0, 0, 0);
-	Instr* i = &core.back();
+	Instr* i = new Instr(linenum, type, 0, 0, 0);
+	core.push_back(i);
 	std::string l(lc);
 	if (labels.count(l)) {
 		i->label = labels[l];
