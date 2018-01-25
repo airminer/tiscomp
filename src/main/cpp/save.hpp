@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include <vector>
 
 enum Reg {
     ACC = 1000,
@@ -23,7 +24,13 @@ struct Instr {
     int src;
     int dest;
     int label;
-    Instr(int, int, int, int, int);
+    Instr(const int, const int, const int, const int, const int);
+};
+
+struct Core {
+	int corenum;
+	std::vector<Instr*> instr;
+	Core(const int);
 };
 
 extern "C" int yylex();
@@ -36,5 +43,11 @@ void lineerror(int, const char*, ...);
 
 void pushLabel(char*);
 void popLabels();
-void clearLabels();
-void pushJump(char*, int);
+
+Instr* pushInstr(const int);
+void pushInstr1(const int, const int);
+void pushInstrL(const int, const char*);
+void pushInstr2(const int, const int, const int);
+
+void startCore();
+void endCore();

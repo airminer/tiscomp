@@ -27,7 +27,7 @@ cores:
     cores core
   | core;
 core:
-    corenum lines ENDL { clearLabels(); };
+    corenum { startCore(); } lines ENDL { endCore(); };
 corenum:
     '@' INT ENDL { if ($2 == corenum + 1) { printf("Core %d:\n", ++corenum); } else yyerror("Non-consecutive core number\n"); };
 lines:
@@ -39,10 +39,10 @@ line:
   | LABEL ':' instr ENDL { pushLabel($1); instrn++; popLabels(); }
   | ENDL;
 instr:
-    INSTR0
-  | INSTR1 src
-  | INSTRL LABEL { pushJump($2, $1); }
-  | INSTR2 src REG;
+    INSTR0 { pushInstr($1); }
+  | INSTR1 src { pushInstr1($1, $2); }
+  | INSTRL LABEL { pushInstrL($1, $2); }
+  | INSTR2 src REG { pushInstr2($1, $2, $3); };
 src:
     REG
   | INT;

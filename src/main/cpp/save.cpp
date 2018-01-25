@@ -14,9 +14,12 @@ std::unordered_map<std::string, int> labels;
 std::vector<std::string> floating;
 std::unordered_map<std::string, std::vector<Instr*>> unresolved;
 
-std::vector<Instr*> core;
 
-Instr::Instr(int line, int type, int src, int dest, int label) : line(line),  type(type), src(src), dest(dest), label(label) {}
+std::vector<Core*> cores;
+Core* core = NULL;
+
+Instr::Instr(const int line, const int type, const int src, const int dest, const int label) : line(line),  type(type), src(src), dest(dest), label(label) {}
+Core::Core(const int corenum) : corenum(corenum) {}
 
 void pushLabel(char* lc) {
 	std::string l(lc);
@@ -46,12 +49,7 @@ void popLabels() {
 void clearLabels() {
 	instrn = 0;
 	popLabels();
-	printf("COREDUMP\n");
-	for (Instr* i : core) {
-		printf("%d:JMP %d\n", i->line, i->label);
-	}
 	if (!unresolved.empty()) {
-		std::string l = "";
 		for (std::pair<std::string, std::vector<Instr*>> e : unresolved) {
 			for (Instr* i : e.second) {
 				lineerror(i->line, "Label %s is undefined\n", e.first.c_str());
@@ -63,14 +61,45 @@ void clearLabels() {
 	}
 }
 
-void pushJump(char* lc, int type) {
-    printf("JMPLINE: %d\n", linenum);
+Instr* pushInstr(const int type) {
 	Instr* i = new Instr(linenum, type, 0, 0, 0);
-	core.push_back(i);
+	core->instr.push_back(i);
+	return i;
+}
+
+void pushInstr1(const int type, const int src) {
+	Instr* i = pushInstr(type);
+	i->src = src;
+}
+
+void pushInstrL(const int type, const char* lc) {
+	Instr* i = pushInstr(type);
 	std::string l(lc);
 	if (labels.count(l)) {
 		i->label = labels[l];
 	} else {
 		unresolved[l].push_back(i);
+	}
+}
+
+void pushInstr2(const int type, const int src, const int dest) {
+	Instr* i = pushInstr(type);
+	i->src = src;
+	i->dest = dest;
+}
+
+void startCore() {
+	if (core && core->instr.size() == 0) {
+		core->corenum = corenum;
+		printf("Reused previous core\n");
+	} else {
+		core = new Core(corenum);
+	}
+}
+
+void endCore() {
+	clearLabels();
+	if (core->instr.size() > 0) {
+		cores.push_back(core);
 	}
 }
