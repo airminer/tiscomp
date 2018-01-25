@@ -4,14 +4,14 @@
 #include <vector>
 
 enum Reg {
-    ACC = 1000,
-    NIL = 1001,
-    LEFT = 1002,
-    RIGHT = 1003,
+    NIL = 1000,
+    ACC = 1001,
+    ANY = 1002,
+    LAST = 1003,
     UP = 1004,
-    DOWN = 1005,
-    ANY = 1006,
-    LAST = 1007
+    RIGHT = 1005,
+    DOWN = 1006,
+    LEFT = 1007
 };
 
 enum InstrType {
