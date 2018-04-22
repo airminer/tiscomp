@@ -248,8 +248,8 @@ module toplevel(
 	 
 	 */
 	 
-	 reg [3:0] pLength = 4'b0010;
-	 reg [15:0] prog [14:0];
+	 reg [3:0] pLength = 4'd3;
+	 reg [15:0] prog [0:14];
 	 
 	 initial begin
 		$readmemh("mem.txt", prog);

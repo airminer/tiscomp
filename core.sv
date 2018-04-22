@@ -2,7 +2,7 @@ module core (
 	input wire clk,
 	input wire rst,
 	input logic [3:0] pLength,
-	input logic [15:0] prog [14:0],
+	input logic [15:0] prog [0:14],
 	output reg [3:0] pc,
 	output reg signed [10:0] acc,
 	output reg signed [10:0] bak
@@ -32,19 +32,19 @@ module core (
 						else if(acc - signed'(prog[pc][10:0]) < -11'sd999) acc <= -11'sd999;
 						else acc <= acc - signed'(prog[pc][10:0]);
 					3'b110: //JRO
-						if(pc + signed'(prog[pc][10:0]) > signed'(pLength-1)) pc <= pLength-1;
-						else if(pc + signed'(prog[pc][10:0]) < 4'sd0) pc <= 0;
-						else pc <= pc + signed'(prog[pc][10:0]);
+						if(signed'(5'(pc)) + signed'(prog[pc][10:0]) > signed'(5'(pLength-1))) pc <= pLength-1;
+						else if(signed'(5'(pc)) + signed'(prog[pc][10:0]) < 5'sd0) pc <= 0;
+						else pc <= signed'(5'(pc)) + signed'(prog[pc][10:0]);
 					3'b111:
 						case(prog[pc][10:4])
 							7'b1111011: //JEZ
-								if(acc == 11'b0) pc <= prog[pc][3:0];
+								if(acc == 11'sb0) pc <= prog[pc][3:0];
 							7'b1111100: //JNZ
-								if(acc != 11'b0) pc <= prog[pc][3:0];
+								if(acc != 11'sb0) pc <= prog[pc][3:0];
 							7'b1111101: //JGZ
-								if(acc > 11'b0) pc <= prog[pc][3:0];
+								if(acc > 11'sb0) pc <= prog[pc][3:0];
 							7'b1111110: //JLZ
-								if(acc < 11'b0) pc <= prog[pc][3:0];
+								if(acc < 11'sb0) pc <= prog[pc][3:0];
 							7'b1111111:
 								case(prog[pc][3:0])
 									4'b1100: //SWP
@@ -52,11 +52,11 @@ module core (
 											acc <= bak;
 											bak <= acc;
 										end
-									4'b1100: //SAV
+									4'b1101: //SAV
 										bak <= acc;
-									4'b1100: //NEG
+									4'b1110: //NEG
 										acc <= -acc;
-									4'b1100: //HCF
+									4'b1111: //HCF
 										;
 								endcase
 						endcase
