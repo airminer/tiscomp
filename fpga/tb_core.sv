@@ -24,7 +24,7 @@ module tb_core
    end
 
    core core0(.clk(clk), .rst(rst), .pLength(pLength), .prog(prog[0:14]), .acc(acc0),
-	    .rreadyL(0), .rreadyR(0), .rreadyU(0), .rreadyD(0), .left(1), .right(2), .up(3), .down(4));
+	    .rreadyL(1), .rreadyR(1), .rreadyU(1), .rreadyD(1), .left(1), .right(2), .up(3), .down(4));
    //core core1(.clk(clk), .rst(rst), .pLength(pLength), .prog(prog[15:29]), .acc(acc1));
 
    int numerr;
