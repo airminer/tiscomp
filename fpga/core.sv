@@ -33,14 +33,15 @@ module core (
    output reg readL,
    output reg readR,
    output reg readU,
-   output reg readD
+   output reg readD,
+
+   output reg [3:0] pc,
+   output reg signed [10:0] acc,
+   output reg signed [10:0] bak
    );
 
    //REGISTERS
 
-   reg [3:0] pc;
-   reg signed [10:0] acc;
-   reg signed [10:0] bak;
    reg [10:0] last;
 
    always_ff @(posedge clk or posedge rst) begin
@@ -79,7 +80,7 @@ module core (
                            pc <= pc;
                         end
                         if(prog[pc][10:0] == `ANY)
-                           last = `LEFT;
+                           last <= `LEFT;
                      end
                      else if((prog[pc][10:0] == `RIGHT) || ((prog[pc][10:0] == `ANY) && (last == `LEFT)) || ((prog[pc][10:0] == `LAST) && (last == `RIGHT))) begin //RIGHT
                         if(rreadyR) begin
@@ -92,7 +93,7 @@ module core (
                            pc <= pc;
                         end
                         if(prog[pc][10:0] == `ANY)
-                           last = `RIGHT;
+                           last <= `RIGHT;
                      end
                      else if((prog[pc][10:0] == `UP) || ((prog[pc][10:0] == `ANY) && (last == `RIGHT)) || ((prog[pc][10:0] == `LAST) && (last == `UP))) begin //UP
                         if(rreadyU) begin
@@ -105,7 +106,7 @@ module core (
                            pc <= pc;
                         end
                         if(prog[pc][10:0] == `ANY)
-                           last = `UP;
+                           last <= `UP;
                      end
                      else if((prog[pc][10:0] == `DOWN) || ((prog[pc][10:0] == `ANY) && (last == `UP)) || ((prog[pc][10:0] == `LAST) && (last == `DOWN))) begin //DOWN
                         if(rreadyD) begin
@@ -118,7 +119,7 @@ module core (
                            pc <= pc;
                         end
                         if(prog[pc][10:0] == `ANY)
-                           last = `DOWN;
+                           last <= `DOWN;
                      end
                   end
                   else begin

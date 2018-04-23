@@ -232,7 +232,7 @@ module toplevel(
     } buttonsT;
 
     wire rst;
-    wire clk;
+    //wire clk;
 
     /*
     logic [7:0] posl;
@@ -249,21 +249,23 @@ module toplevel(
     */
 
     reg [3:0] pLength = 4'd4;
-    reg [15:0] prog [0:14];
+    reg [15:0] prog [0:179];
 
     initial begin
       $readmemh("mem.txt", prog);
     end
 
-    logic [3:0] pc;
+    logic [3:0] pc0;
     logic signed [10:0] acc;
     logic signed [10:0] bak;
 
+    logic [3:0] pc1;
 
-    core core0(.clk(clk), .rst(rst), .pLength(pLength), .prog(prog));
+    core core0(.clk(CLOCK_50), .rst(rst), .pLength(pLength), .prog(prog[0:14]), .pc(pc0), .acc(acc), .bak(bak));
+    core core1(.clk(CLOCK_50), .rst(rst), .pLength(pLength), .prog(prog[15:29]), .pc(pc1));
 
-    hex_to_7seg hex0(.hexval(pc), .ledcode(HEX5));
-    hex_to_7seg hex1(.hexval(acc[10:8]), .ledcode(HEX4));
+    hex_to_7seg hex0(.hexval(pc0), .ledcode(HEX5));
+    hex_to_7seg hex1(.hexval(pc1), .ledcode(HEX4));
     hex_to_7seg hex2(.hexval(acc[7:4]),  .ledcode(HEX3));
     hex_to_7seg hex3(.hexval(acc[3:0]),  .ledcode(HEX2));
 
@@ -286,9 +288,10 @@ module toplevel(
 
     always_comb begin
       rst = ~KEY[0];
-      clk = ~KEY[1];
+      //clk = ~KEY[1];
       //LEDR = {rst, buttons[15:12], buttons[7:3]};
-      LEDR = {clk, rst};
+      //LEDR = {clk, rst};
+      LEDR = rst;
     end
 endmodule
 
