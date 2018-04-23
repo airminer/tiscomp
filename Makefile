@@ -11,7 +11,7 @@ RM= rm -f
 SED= sed
 
 TISCOMP_T=$(MAIN)/tiscomp.exe
-TISCOMP_O=$(MAIN)/tiscomp.o
+TISCOMP_O=$(MAIN)/tiscomp.o $(MAIN)/save.tab.o $(MAIN)/save.yy.o $(MAIN)/save.o
 
 all: $(TISCOMP_T)
 

@@ -1,6 +1,32 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <lua.hpp>
+
+extern "C" int yyparse();
+extern "C" FILE *yyin;
+extern int linenum, yydebug;
+
+void lineerror(int line, const char *s, ...) {
+	fprintf(stderr, "Parse error at line %d: ", line);
+
+	va_list argptr;
+	va_start(argptr, s);
+	vfprintf(stderr, s, argptr);
+	va_end(argptr);
+}
+
+void yyerror(const char *s, ...) {
+	fprintf(stderr, "Parse error at line %d: ", linenum);
+
+	va_list argptr;
+	va_start(argptr, s);
+	vfprintf(stderr, s, argptr);
+	va_end(argptr);
+
+	// might as well halt now:
+	exit(1);
+}
 
 enum TIS_TILE {
 	TILE_COMPUTE = 1000,
@@ -21,13 +47,15 @@ void setint(lua_State *L, const char* s, lua_Integer i) {
 
 int main(int argc, char* argv[]) {
 	char* file;
+	char* save;
 
-	if (argc < 2) {
-		fprintf(stderr, "No file provided.\n");
-		fprintf(stderr, "Usage: tiscomp FILE\n");
+	if (argc < 3) {
+		fprintf(stderr, "Not enough arguments.\n");
+		fprintf(stderr, "Usage: tiscomp FILE SAVE\n");
 		exit(1);
 	} else {
 		file = argv[1];
+		save = argv[2];
 	}
 
 	lua_State *L;
@@ -150,9 +178,9 @@ int main(int argc, char* argv[]) {
 	}
 
 	int c = 0;
-	lua_Integer compute[12];
+	int compute[12];
 	int m = 0;
-	lua_Integer memory[12];
+	int memory[12];
 
 	for (int i = 1; i <= 12; i++) {
 		lua_rawgeti(L, -1, i);
@@ -193,6 +221,23 @@ int main(int argc, char* argv[]) {
 		}
 		printf("\n");
 	}
+
+	//yydebug = 1;
+
+	// open a file handle to a particular file:
+	FILE *myfile = fopen(save, "r");
+	// make sure it's valid:
+	if (!myfile) {
+		fprintf(stderr, "Couldn't load save file: %s\n", save);
+		return 1;
+	}
+	// set flex to read from it instead of defaulting to STDIN:
+	yyin = myfile;
+
+	// parse through the input until there is no more:
+	do {
+		yyparse();
+	} while (!feof(yyin));
 
     return 0;
 }
