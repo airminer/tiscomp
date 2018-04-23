@@ -256,6 +256,8 @@ int main(int argc, char* argv[]) {
 		yyparse();
 	} while (!feof(yyin));
 
+	fclose(myfile);
+
 	Core* disabled = new Core(-1);
 
 	//Core* stack = new Core(-2);
@@ -295,13 +297,25 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	printf("\nlength.txt\n\n");
+	FILE *lentxt = fopen("len.txt", "w");
 
-	for (Core* c : renum) {
-		printf("%lX\n", c->instr.size());
+	if (!lentxt) {
+		fprintf(stderr, "Couldn't open output file: len.txt\n");
+		return 1;
 	}
 
-	printf("\nprog.txt\n\n");
+	for (Core* c : renum) {
+		fprintf(lentxt, "%lX\n", c->instr.size());
+	}
+
+	fclose(lentxt);
+
+	FILE *progtxt = fopen("prog.txt", "w");
+
+	if (!progtxt) {
+		fprintf(stderr, "Couldn't open output file: prog.txt\n");
+		return 1;
+	}
 
 	for (Core* c : renum) {
 		size_t i = 0;
@@ -323,14 +337,16 @@ int main(int argc, char* argv[]) {
 				r = r | ((uint16_t) c->instr[i]->label & (uint16_t) 0xF);
 				break;
 			}
-			printf("%04hX\n", r);
+			fprintf(progtxt, "%04hX\n", r);
 			i++;
 		}
 		while (i < 15) {
-			printf("0000\n");
+			fprintf(progtxt, "0000\n");
 			i++;
 		}
 	}
+
+	fclose(progtxt);
 
     return 0;
 }
