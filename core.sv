@@ -37,6 +37,8 @@ module core (
 						else pc <= signed'(5'(pc)) + signed'(prog[pc][10:0]);
 					3'b111:
 						case(prog[pc][10:4])
+							7'b1111010: //JMP
+								pc <= prog[pc][3:0];
 							7'b1111011: //JEZ
 								if(acc == 11'sb0) pc <= prog[pc][3:0];
 							7'b1111100: //JNZ
@@ -56,7 +58,7 @@ module core (
 										bak <= acc;
 									4'b1110: //NEG
 										acc <= -acc;
-									4'b1111: //HCF
+									4'b1111: //NOP
 										;
 								endcase
 						endcase
