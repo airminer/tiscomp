@@ -62,6 +62,9 @@ void clearLabels() {
 }
 
 Instr* pushInstr(const int type) {
+	if (instrn > 14) {
+		yyerror("Too many instructions\n");
+	}
 	Instr* i = new Instr(linenum, type, 0, 0, 0);
 	core->instr.push_back(i);
 	return i;
