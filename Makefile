@@ -40,5 +40,5 @@ clean:
 
 .SUFFIXES:
 
-$(MAIN)/save.yy.o : $(MAIN)/save.tab.h
+$(MAIN)/save.yy.o : $(MAIN)/save.tab.h $(MAIN)/save.hpp
 $(MAIN)/save.tab.o  $(MAIN)/save.o : $(MAIN)/save.hpp

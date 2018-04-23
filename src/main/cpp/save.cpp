@@ -92,17 +92,10 @@ void pushInstr2(const int type, const int src, const int dest) {
 }
 
 void startCore() {
-	if (core && core->instr.size() == 0) {
-		core->corenum = corenum;
-		printf("Reused previous core\n");
-	} else {
 		core = new Core(corenum);
-	}
 }
 
 void endCore() {
 	clearLabels();
-	if (core->instr.size() > 0) {
-		cores.push_back(core);
-	}
+	cores.push_back(core);
 }

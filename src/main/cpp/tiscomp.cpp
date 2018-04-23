@@ -2,10 +2,13 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <lua.hpp>
+#include "save.hpp"
 
 extern "C" int yyparse();
 extern "C" FILE *yyin;
 extern int linenum, yydebug;
+
+extern std::vector<Core*> cores;
 
 void lineerror(int line, const char *s, ...) {
 	fprintf(stderr, "Parse error at line %d: ", line);
@@ -43,6 +46,20 @@ void setnil(lua_State *L, const char* s) {
 void setint(lua_State *L, const char* s, lua_Integer i) {
 	lua_pushinteger(L, i);
 	lua_setfield(L, -2, s);
+}
+
+void printsrc(int i) {
+	switch(i) {
+	case NIL: printf("NIL"); break;
+	case ACC: printf("ACC"); break;
+	case ANY: printf("ANY"); break;
+	case LAST: printf("LAST"); break;
+	case UP: printf("UP"); break;
+	case RIGHT: printf("RIGHT"); break;
+	case DOWN: printf("DOWN"); break;
+	case LEFT: printf("LEFT"); break;
+	default: printf("%d", i); break;
+	}
 }
 
 int main(int argc, char* argv[]) {
@@ -173,13 +190,13 @@ int main(int argc, char* argv[]) {
 	size_t l;
 
 	if ((l = lua_rawlen(L, -1)) != 12) {
-		fprintf(stderr, "Failed to get layout: get_layout() returned a table of length %d\n", l);
+		fprintf(stderr, "Failed to get layout: get_layout() returned a table of length %ld\n", l);
 		exit(1);
 	}
 
-	int c = 0;
+	size_t c = 0;
 	int compute[12];
-	int m = 0;
+	size_t m = 0;
 	int memory[12];
 
 	for (int i = 1; i <= 12; i++) {
@@ -192,15 +209,15 @@ int main(int argc, char* argv[]) {
 		lua_remove(L, -1);
 
 		if (tile < TILE_COMPUTE || tile > TILE_JOURNAL) {
-			fprintf(stderr, "Failed to get layout: element %d of get_layout() is not a valid tile value(%d)\n", i, tile);
+			fprintf(stderr, "Failed to get layout: element %d of get_layout() is not a valid tile value(%ld)\n", i, tile);
 			exit(1);
 		}
 
 		switch (tile) {
 		case TILE_COMPUTE:
-			compute[c++] = i; break;
+			compute[c++] = i-1; break;
 		case TILE_MEMORY:
-			memory[m++] = i; break;
+			memory[m++] = i-1; break;
 		}
 	}
 
@@ -208,15 +225,15 @@ int main(int argc, char* argv[]) {
 
 	if (c > 0) {
 		printf("Compute tiles:\n0:%d", compute[0]);
-		for (int i = 1; i < c; i++) {
-			printf(" %d:%d", i, compute[i]);
+		for (size_t i = 1; i < c; i++) {
+			printf(" %ld:%d", i, compute[i]);
 		}
 		printf("\n");
 	}
 
 	if (m > 0) {
 		printf("Memory tiles:\n%d", memory[0]);
-		for (int i = 1; i < m; i++) {
+		for (size_t i = 1; i < m; i++) {
 			printf(" %d", memory[i]);
 		}
 		printf("\n");
@@ -238,6 +255,82 @@ int main(int argc, char* argv[]) {
 	do {
 		yyparse();
 	} while (!feof(yyin));
+
+	Core* disabled = new Core(-1);
+
+	//Core* stack = new Core(-2);
+
+	std::vector<Core*> renum(12, disabled);
+
+	for (size_t i = 0; i < cores.size() && i < c; i++) {
+		renum[compute[i]] = cores[i];
+	}
+
+	/*
+	for (size_t i = 0; i < m; i++) {
+		renum[memory[i]] = stack;
+	}
+	*/
+
+	printf("\n");
+
+	for (Core* c : renum) {
+		printf("Core %d: length: %ld\n", c->corenum, c->instr.size());
+		for (unsigned int i = 0; i < c->instr.size(); i++) {
+			switch (c->instr[i]->type) {
+			case NOP: printf("NOP\n"); break;
+			case SWP: printf("SWP\n"); break;
+			case SAV: printf("SAV\n"); break;
+			case NEG: printf("NEG\n"); break;
+			case ADD: printf("ADD "); printsrc(c->instr[i]->src); printf("\n"); break;
+			case SUB: printf("SUB "); printsrc(c->instr[i]->src); printf("\n"); break;
+			case JRO: printf("JRO "); printsrc(c->instr[i]->src); printf("\n"); break;
+			case JMP: printf("JMP %d\n", c->instr[i]->label); break;
+			case JEZ: printf("JEZ %d\n", c->instr[i]->label); break;
+			case JNZ: printf("JNZ %d\n", c->instr[i]->label); break;
+			case JGZ: printf("JGZ %d\n", c->instr[i]->label); break;
+			case JLZ: printf("JLZ %d\n", c->instr[i]->label); break;
+			case MOV: printf("MOV "); printsrc(c->instr[i]->src); printf(" "); printsrc(c->instr[i]->dest); printf("\n"); break;
+			}
+		}
+	}
+
+	printf("\nlength.txt\n\n");
+
+	for (Core* c : renum) {
+		printf("%lX\n", c->instr.size());
+	}
+
+	printf("\nprog.txt\n\n");
+
+	for (Core* c : renum) {
+		size_t i = 0;
+		while (i < c->instr.size()) {
+			uint16_t r = (uint16_t) c->instr[i]->type;
+			switch (r) {
+			case MOV:
+				r = r | (uint16_t) (c->instr[i]->dest - 1000) << 11;
+			case ADD:
+			case SUB:
+			case JRO:
+				r = r | ((uint16_t) c->instr[i]->src & (uint16_t) 0x7FF);
+				break;
+			case JMP:
+			case JEZ:
+			case JNZ:
+			case JGZ:
+			case JLZ:
+				r = r | ((uint16_t) c->instr[i]->label & (uint16_t) 0xF);
+				break;
+			}
+			printf("%04hX\n", r);
+			i++;
+		}
+		while (i < 15) {
+			printf("0000\n");
+			i++;
+		}
+	}
 
     return 0;
 }

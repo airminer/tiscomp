@@ -15,7 +15,19 @@ enum Reg {
 };
 
 enum InstrType {
-	NOP, SWP, SAV, NEG, ADD, SUB, JRO, JMP, JEZ, JNZ, JGZ, JLZ, MOV
+	MOV = 0x0000,
+	ADD = 0x6000,
+	SUB = 0x6800,
+	JRO = 0x7000,
+	JMP = 0x7FA0,
+	JEZ = 0x7FB0,
+	JNZ = 0x7FC0,
+	JGZ = 0x7FD0,
+	JLZ = 0x7FE0,
+	SWP = 0x7FFC,
+	SAV = 0x7FFD,
+	NEG = 0x7FFE,
+	NOP = 0x7FFF
 };
 
 struct Instr {
