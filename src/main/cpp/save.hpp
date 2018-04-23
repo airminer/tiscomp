@@ -8,10 +8,10 @@ enum Reg {
     ACC = 1001,
     ANY = 1002,
     LAST = 1003,
-    UP = 1004,
+    LEFT = 1004,
     RIGHT = 1005,
-    DOWN = 1006,
-    LEFT = 1007
+    UP = 1006,
+    DOWN = 1007
 };
 
 enum InstrType {
