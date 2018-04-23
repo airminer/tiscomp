@@ -52,6 +52,11 @@ module core (
          last <= `NIL;
       end
       else begin
+         readL <= 0;
+         readR <= 0;
+         readU <= 0;
+         readD <= 0;
+
          if(pc == pLength-1)
             pc <= 0;
          else
@@ -65,15 +70,15 @@ module core (
                3'b100: //ADD
                   if(signed'(prog[pc][10:0]) > 11'sd999) begin
                      if(prog[pc][10:0] == `ACC ) begin //ACC
-                        if((acc + acc) > 11'sd999) acc <= 11'sd999;
-                        else if((acc + acc) < -11'sd999) acc <= -11'sd999;
+                        if((acc + acc) > 12'sd999) acc <= 11'sd999;
+                        else if((acc + acc) < -12'sd999) acc <= -11'sd999;
                         else acc <= acc + acc;
                      end
                      else if((prog[pc][10:0] == `LEFT) || ((prog[pc][10:0] == `ANY) && ((last == `NIL) || (last == `DOWN))) || ((prog[pc][10:0] == `LAST) && (last == `LEFT))) begin //LEFT
                         if(rreadyL) begin
                            readL <= 1;
-                           if((acc + left) > 11'sd999) acc <= 11'sd999;
-                           else if((acc + left) < -11'sd999) acc <= -11'sd999;
+                           if((acc + left) > 12'sd999) acc <= 11'sd999;
+                           else if((acc + left) < -12'sd999) acc <= -11'sd999;
                            else acc <= acc + left;
                         end
                         else begin
@@ -85,8 +90,8 @@ module core (
                      else if((prog[pc][10:0] == `RIGHT) || ((prog[pc][10:0] == `ANY) && (last == `LEFT)) || ((prog[pc][10:0] == `LAST) && (last == `RIGHT))) begin //RIGHT
                         if(rreadyR) begin
                            readR <= 1;
-                           if((acc + right) > 11'sd999) acc <= 11'sd999;
-                           else if((acc + right) < -11'sd999) acc <= -11'sd999;
+                           if((acc + right) > 12'sd999) acc <= 11'sd999;
+                           else if((acc + right) < -12'sd999) acc <= -11'sd999;
                            else acc <= acc + right;
                         end
                         else begin
@@ -98,8 +103,8 @@ module core (
                      else if((prog[pc][10:0] == `UP) || ((prog[pc][10:0] == `ANY) && (last == `RIGHT)) || ((prog[pc][10:0] == `LAST) && (last == `UP))) begin //UP
                         if(rreadyU) begin
                            readU <= 1;
-                           if((acc + up) > 11'sd999) acc <= 11'sd999;
-                           else if((acc + up) < -11'sd999) acc <= -11'sd999;
+                           if((acc + up) > 12'sd999) acc <= 11'sd999;
+                           else if((acc + up) < -12'sd999) acc <= -11'sd999;
                            else acc <= acc + up;
                         end
                         else begin
@@ -111,8 +116,8 @@ module core (
                      else if((prog[pc][10:0] == `DOWN) || ((prog[pc][10:0] == `ANY) && (last == `UP)) || ((prog[pc][10:0] == `LAST) && (last == `DOWN))) begin //DOWN
                         if(rreadyD) begin
                            readD <= 1;
-                           if((acc + down) > 11'sd999) acc <= 11'sd999;
-                           else if((acc + down) < -11'sd999) acc <= -11'sd999;
+                           if((acc + down) > 12'sd999) acc <= 11'sd999;
+                           else if((acc + down) < -12'sd999) acc <= -11'sd999;
                            else acc <= acc + down;
                         end
                         else begin
@@ -123,13 +128,13 @@ module core (
                      end
                   end
                   else begin
-                     if(acc + signed'(prog[pc][10:0]) > 11'sd999) acc <= 11'sd999;
-                     else if(acc + signed'(prog[pc][10:0]) < -11'sd999) acc <= -11'sd999;
+                     if(acc + signed'(prog[pc][10:0]) > 12'sd999) acc <= 11'sd999;
+                     else if(acc + signed'(prog[pc][10:0]) < -12'sd999) acc <= -11'sd999;
                      else acc <= acc + signed'(prog[pc][10:0]);
                   end
                3'b101: //SUB
-                  if(acc - signed'(prog[pc][10:0]) > 11'sd999) acc <= 11'sd999;
-                  else if(acc - signed'(prog[pc][10:0]) < -11'sd999) acc <= -11'sd999;
+                  if(acc - signed'(prog[pc][10:0]) > 12'sd999) acc <= 11'sd999;
+                  else if(acc - signed'(prog[pc][10:0]) < -12'sd999) acc <= -11'sd999;
                   else acc <= acc - signed'(prog[pc][10:0]);
                3'b110: //JRO
                   if(signed'(5'(pc)) + signed'(prog[pc][10:0]) > signed'(5'(pLength-1))) pc <= pLength-1;

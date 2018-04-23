@@ -11,18 +11,20 @@ module tb_core
    output logic      rst,
    output logic [1:0]   in,
    output logic [7:0]   correct,
-   output logic [7:0]   count
+   output logic [7:0]   count,
+   output logic [10:0] acc0,
+   output logic [10:0] acc1
    );
 
-   reg [3:0] pLength = 4'd4;
+   reg [3:0] pLength = 4'd2;
    reg [15:0] prog [0:179];
 
    initial begin
       $readmemh("mem.txt", prog);
    end
 
-   core core0(.clk(clk), .rst(rst), .pLength(pLength), .prog(prog[0:14]));
-   core core1(.clk(clk), .rst(rst), .pLength(pLength), .prog(prog[15:29]));
+   core core0(.clk(clk), .rst(rst), .pLength(pLength), .prog(prog[0:14]), .acc(acc0));
+   //core core1(.clk(clk), .rst(rst), .pLength(pLength), .prog(prog[15:29]), .acc(acc1));
 
    int numerr;
    bit endtest;
