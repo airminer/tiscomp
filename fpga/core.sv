@@ -50,13 +50,16 @@ module core (
          acc <= 0;
          bak <= 0;
          last <= `NIL;
+			readL <= 0;
+         readR <= 0;
+         readU <= 0;
+         readD <= 0;
       end
       else begin
          readL <= 0;
          readR <= 0;
          readU <= 0;
          readD <= 0;
-
          if(pc == pLength-1)
             pc <= 0;
          else
@@ -74,57 +77,57 @@ module core (
                         else if((acc + acc) < -12'sd999) acc <= -11'sd999;
                         else acc <= acc + acc;
                      end
-                     else if((prog[pc][10:0] == `LEFT) || ((prog[pc][10:0] == `ANY) && ((last == `NIL) || (last == `DOWN))) || ((prog[pc][10:0] == `LAST) && (last == `LEFT))) begin //LEFT
+                     else if((prog[pc][10:0] == `LEFT) || ((prog[pc][10:0] == `ANY) && rreadyL) || ((prog[pc][10:0] == `LAST) && (last == `LEFT))) begin //LEFT
                         if(rreadyL) begin
                            readL <= 1;
                            if((acc + left) > 12'sd999) acc <= 11'sd999;
                            else if((acc + left) < -12'sd999) acc <= -11'sd999;
                            else acc <= acc + left;
-                        end
+                           if(prog[pc][10:0] == `ANY)
+                               last <= `LEFT;
+								end
                         else begin
                            pc <= pc;
                         end
-                        if(prog[pc][10:0] == `ANY)
-                           last <= `LEFT;
                      end
-                     else if((prog[pc][10:0] == `RIGHT) || ((prog[pc][10:0] == `ANY) && (last == `LEFT)) || ((prog[pc][10:0] == `LAST) && (last == `RIGHT))) begin //RIGHT
+                     else if((prog[pc][10:0] == `RIGHT) || ((prog[pc][10:0] == `ANY) && rreadyR) || ((prog[pc][10:0] == `LAST) && (last == `RIGHT))) begin //RIGHT
                         if(rreadyR) begin
                            readR <= 1;
                            if((acc + right) > 12'sd999) acc <= 11'sd999;
                            else if((acc + right) < -12'sd999) acc <= -11'sd999;
                            else acc <= acc + right;
-                        end
+                           if(prog[pc][10:0] == `ANY)
+                               last <= `RIGHT;
+								end
                         else begin
                            pc <= pc;
                         end
-                        if(prog[pc][10:0] == `ANY)
-                           last <= `RIGHT;
                      end
-                     else if((prog[pc][10:0] == `UP) || ((prog[pc][10:0] == `ANY) && (last == `RIGHT)) || ((prog[pc][10:0] == `LAST) && (last == `UP))) begin //UP
+                     else if((prog[pc][10:0] == `UP) || ((prog[pc][10:0] == `ANY) && rreadyU) || ((prog[pc][10:0] == `LAST) && (last == `UP))) begin //UP
                         if(rreadyU) begin
                            readU <= 1;
                            if((acc + up) > 12'sd999) acc <= 11'sd999;
                            else if((acc + up) < -12'sd999) acc <= -11'sd999;
                            else acc <= acc + up;
+									if(prog[pc][10:0] == `ANY)
+                               last <= `UP;
                         end
                         else begin
                            pc <= pc;
                         end
-                        if(prog[pc][10:0] == `ANY)
-                           last <= `UP;
                      end
-                     else if((prog[pc][10:0] == `DOWN) || ((prog[pc][10:0] == `ANY) && (last == `UP)) || ((prog[pc][10:0] == `LAST) && (last == `DOWN))) begin //DOWN
+                     else if((prog[pc][10:0] == `DOWN) || (prog[pc][10:0] == `ANY) || ((prog[pc][10:0] == `LAST) && (last == `DOWN))) begin //DOWN
                         if(rreadyD) begin
                            readD <= 1;
                            if((acc + down) > 12'sd999) acc <= 11'sd999;
                            else if((acc + down) < -12'sd999) acc <= -11'sd999;
                            else acc <= acc + down;
+									if(prog[pc][10:0] == `ANY)
+                               last <= `DOWN;
                         end
                         else begin
                            pc <= pc;
                         end
-                        if(prog[pc][10:0] == `ANY)
-                           last <= `DOWN;
                      end
                   end
                   else begin
