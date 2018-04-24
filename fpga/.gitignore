@@ -5,4 +5,5 @@ output_files/
 !output_files/Chain.cdf
 toplevel.qws
 work/
-
+simulation/
+transcript

@@ -312,13 +312,136 @@ module core (
                         else acc <= acc + signed'(prog[pc][10:0]);
                      end
                   3'b101: //SUB
-                     if(acc - signed'(prog[pc][10:0]) > 12'sd999) acc <= 11'sd999;
-                     else if(acc - signed'(prog[pc][10:0]) < -12'sd999) acc <= -11'sd999;
-                     else acc <= acc - signed'(prog[pc][10:0]);
+                     if(signed'(prog[pc][10:0]) > 11'sd999) begin
+                        if(prog[pc][10:0] == `ACC ) begin //ACC
+                           acc <= 0;
+                        end
+                        else if((prog[pc][10:0] == `LEFT) || ((prog[pc][10:0] == `ANY) && rreadyL) || ((prog[pc][10:0] == `LAST) && (last == `DLEFT))) begin //LEFT
+                           if(rreadyL) begin
+                              readL <= 1;
+                              if((acc - left) > 12'sd999) acc <= 11'sd999;
+                              else if((acc - left) < -12'sd999) acc <= -11'sd999;
+                              else acc <= acc - left;
+                              if(prog[pc][10:0] == `ANY)
+                                  last <= `DLEFT;
+                           end
+                           else begin
+                              pc <= pc;
+                           end
+                        end
+                        else if((prog[pc][10:0] == `RIGHT) || ((prog[pc][10:0] == `ANY) && rreadyR) || ((prog[pc][10:0] == `LAST) && (last == `DRIGHT))) begin //RIGHT
+                           if(rreadyR) begin
+                              readR <= 1;
+                              if((acc - right) > 12'sd999) acc <= 11'sd999;
+                              else if((acc - right) < -12'sd999) acc <= -11'sd999;
+                              else acc <= acc - right;
+                              if(prog[pc][10:0] == `ANY)
+                                  last <= `DRIGHT;
+                           end
+                           else begin
+                              pc <= pc;
+                           end
+                        end
+                        else if((prog[pc][10:0] == `UP) || ((prog[pc][10:0] == `ANY) && rreadyU) || ((prog[pc][10:0] == `LAST) && (last == `DUP))) begin //UP
+                           if(rreadyU) begin
+                              readU <= 1;
+                              if((acc - up) > 12'sd999) acc <= 11'sd999;
+                              else if((acc - up) < -12'sd999) acc <= -11'sd999;
+                              else acc <= acc - up;
+                              if(prog[pc][10:0] == `ANY)
+                                  last <= `DUP;
+                           end
+                           else begin
+                              pc <= pc;
+                           end
+                        end
+                        else if((prog[pc][10:0] == `DOWN) || (prog[pc][10:0] == `ANY) || ((prog[pc][10:0] == `LAST) && (last == `DDOWN))) begin //DOWN
+                           if(rreadyD) begin
+                              readD <= 1;
+                              if((acc - down) > 12'sd999) acc <= 11'sd999;
+                              else if((acc - down) < -12'sd999) acc <= -11'sd999;
+                              else acc <= acc - down;
+                              if(prog[pc][10:0] == `ANY)
+                                  last <= `DDOWN;
+                           end
+                           else begin
+                              pc <= pc;
+                           end
+                        end
+                     end
+                     else begin
+                        if(acc - signed'(prog[pc][10:0]) > 12'sd999) acc <= 11'sd999;
+                        else if(acc - signed'(prog[pc][10:0]) < -12'sd999) acc <= -11'sd999;
+                        else acc <= acc - signed'(prog[pc][10:0]);
+                     end
                   3'b110: //JRO
-                     if(signed'(5'(pc)) + signed'(prog[pc][10:0]) > signed'(5'(pLength-1))) pc <= pLength-1;
-                     else if(signed'(5'(pc)) + signed'(prog[pc][10:0]) < 5'sd0) pc <= 0;
-                     else pc <= signed'(5'(pc)) + signed'(prog[pc][10:0]);
+						   if(signed'(prog[pc][10:0]) > 11'sd999) begin
+							   if(prog[pc][10:0] == `NIL ) begin //NIL
+                           pc <= 0;
+								end
+                        else if(prog[pc][10:0] == `ACC ) begin //ACC
+                           if((signed'(5'(pc)) + acc) > signed'(5'(pLength-1))) pc <= pLength-1;
+                           else if((signed'(5'(pc)) + acc) < 5'sd0) pc <= 0;
+                           else pc <= signed'(5'(pc)) + acc;
+                        end
+                        else if((prog[pc][10:0] == `LEFT) || ((prog[pc][10:0] == `ANY) && rreadyL) || ((prog[pc][10:0] == `LAST) && (last == `DLEFT))) begin //LEFT
+                           if(rreadyL) begin
+                              readL <= 1;
+                              if((signed'(5'(pc)) + left) > signed'(5'(pLength-1))) pc <= pLength-1;
+                              else if((signed'(5'(pc)) + left) < 5'sd0) pc <= 0;
+                              else pc <= signed'(5'(pc)) + left;
+                              if(prog[pc][10:0] == `ANY)
+                                  last <= `DLEFT;
+                           end
+                           else begin
+                              pc <= pc;
+                           end
+                        end
+                        else if((prog[pc][10:0] == `RIGHT) || ((prog[pc][10:0] == `ANY) && rreadyR) || ((prog[pc][10:0] == `LAST) && (last == `DRIGHT))) begin //RIGHT
+                           if(rreadyR) begin
+                              readR <= 1;
+                              if((signed'(5'(pc)) + right) > signed'(5'(pLength-1))) pc <= pLength-1;
+                              else if((signed'(5'(pc)) + right) < 5'sd0) pc <= 0;
+                              else pc <= signed'(5'(pc)) + right;
+                              if(prog[pc][10:0] == `ANY)
+                                  last <= `DRIGHT;
+                           end
+                           else begin
+                              pc <= pc;
+                           end
+                        end
+                        else if((prog[pc][10:0] == `UP) || ((prog[pc][10:0] == `ANY) && rreadyU) || ((prog[pc][10:0] == `LAST) && (last == `DUP))) begin //UP
+                           if(rreadyU) begin
+                              readU <= 1;
+                              if((signed'(5'(pc)) + up) > signed'(5'(pLength-1))) pc <= pLength-1;
+                              else if((signed'(5'(pc)) + up) < 5'sd0) pc <= 0;
+                              else pc <= signed'(5'(pc)) + up;
+                              if(prog[pc][10:0] == `ANY)
+                                  last <= `DUP;
+                           end
+                           else begin
+                              pc <= pc;
+                           end
+                        end
+                        else if((prog[pc][10:0] == `DOWN) || (prog[pc][10:0] == `ANY) || ((prog[pc][10:0] == `LAST) && (last == `DDOWN))) begin //DOWN
+                           if(rreadyD) begin
+                              readD <= 1;
+                              if((signed'(5'(pc)) + down) > signed'(5'(pLength-1))) pc <= pLength-1;
+                              else if((signed'(5'(pc)) + down) < 5'sd0) pc <= 0;
+                              else pc <= signed'(5'(pc)) + down;
+                              if(prog[pc][10:0] == `ANY)
+                                  last <= `DDOWN;
+                           end
+                           else begin
+                              pc <= pc;
+                           end
+                        end
+                     end
+                     else begin
+                        if(signed'(5'(pc)) + signed'(prog[pc][10:0]) > signed'(5'(pLength-1))) pc <= pLength-1;
+                        else if(signed'(5'(pc)) + signed'(prog[pc][10:0]) < 5'sd0) pc <= 0;
+                        else pc <= signed'(5'(pc)) + signed'(prog[pc][10:0]);
+                     end
                   3'b111:
                      case(prog[pc][10:4])
                         7'b1111010: //JMP
