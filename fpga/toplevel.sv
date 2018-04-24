@@ -73,7 +73,7 @@ module toplevel(
 
       // General purpose I/O
       inout     [35:0]         GPIO_0,
- 
+
       // Hex LEDs
       output      [6:0]  HEX0,
       output      [6:0]  HEX1,
@@ -182,21 +182,21 @@ module toplevel(
       input       [1:0]  DIALR,
       // LED pixel ring (inverted before reaching ring)
       output             LEDRINGn,
-      
+
       // LCD display
       output      [7:0]  LCD_R,
       output      [7:0]  LCD_G,
       output      [7:0]  LCD_B,
       // -- only LCD_R[7:2], LCD_G[7:1], LCD_B[7:2] are wired
       // through to display board, low-order pins are ignored
-        
+
       output             LCD_HSYNC,
       output             LCD_VSYNC,
       output             LCD_DEN,
       output             LCD_DCLK,
-      output             LCD_ON,	    // set high to enable LCD panel
+      output             LCD_ON,     // set high to enable LCD panel
       output             LCD_BACKLIGHT, // set high to turn on backlight, PWM to dim
-      
+
       // shift register for buttons on display board
       output             SHIFT_CLKIN,
       output             SHIFT_LOAD,
@@ -211,85 +211,90 @@ module toplevel(
 );
 
 // code goes here
-	 
-	 typedef struct packed {
-		logic button_b;
-		logic button_a;
-		logic button_y;
-		logic button_x;
-		logic spare0;
-		logic touch_irq;
-		logic spare1;
-		logic spare2;
-		logic nav_u;
-		logic nav_l;
-		logic nav_r;
-		logic nav_d;
-		logic nav_click;
-		logic dialr_click;
-		logic diall_click;
-		logic temperature_alarm;
-	 } buttonsT;
-	 
-	 wire rst;
-	 wire clk;
-	 
-	 /*
-	 logic [7:0] posl;
-	 logic [7:0] posr;
-	 
-	 rotary rotary0(.clk(CLOCK_50), .rst(rst), .rotary_in(DIALL), .rotary_pos(posl));
-	 rotary rotary1(.clk(CLOCK_50), .rst(rst), .rotary_in(DIALR), .rotary_pos(posr));
-	 
-	 hex_to_7seg hex0(.hexval(posl[7:4]), .ledcode(HEX5));
-	 hex_to_7seg hex1(.hexval(posl[3:0]), .ledcode(HEX4));
-	 hex_to_7seg hex2(.hexval(posr[7:4]), .ledcode(HEX3));
-	 hex_to_7seg hex3(.hexval(posr[3:0]), .ledcode(HEX2));
-	 
-	 */
-	 
-	 reg [3:0] pLength = 4'd4;
-	 reg [15:0] prog [0:14];
-	 
-	 initial begin
-		$readmemh("mem.txt", prog);
-	 end
-	 
-	 logic [3:0] pc;
-	 logic signed [10:0] acc;
-	 logic signed [10:0] bak;
-	 
-	 
-	 core core0(.clk(clk), .rst(rst), .pLength(pLength), .prog(prog), .pc(pc), .acc(acc), .bak(bak));
-	 
-	 hex_to_7seg hex0(.hexval(pc), .ledcode(HEX5));
-	 hex_to_7seg hex1(.hexval(acc[10:8]), .ledcode(HEX4));
-	 hex_to_7seg hex2(.hexval(acc[7:4]),  .ledcode(HEX3));
-	 hex_to_7seg hex3(.hexval(acc[3:0]),  .ledcode(HEX2)); 
-	 
-	 
-	 //logic [15:0] buttons;
-	 
-	 //shiftregctl ctl0(.clock_50m(CLOCK_50), .reset(rst), .shiftreg_clk(SHIFT_CLKIN),
-		//			 .shiftreg_loadn(SHIFT_LOAD), .shiftreg_out(SHIFT_OUT), .buttons(buttons));
-	 
-	 
-	/*
-	always_ff @(posedge clk or posedge rst) begin
+
+    typedef struct packed {
+      logic button_b;
+      logic button_a;
+      logic button_y;
+      logic button_x;
+      logic spare0;
+      logic touch_irq;
+      logic spare1;
+      logic spare2;
+      logic nav_u;
+      logic nav_l;
+      logic nav_r;
+      logic nav_d;
+      logic nav_click;
+      logic dialr_click;
+      logic diall_click;
+      logic temperature_alarm;
+    } buttonsT;
+
+    wire rst;
+    //wire clk;
+
+    /*
+    logic [7:0] posl;
+    logic [7:0] posr;
+
+    rotary rotary0(.clk(CLOCK_50), .rst(rst), .rotary_in(DIALL), .rotary_pos(posl));
+    rotary rotary1(.clk(CLOCK_50), .rst(rst), .rotary_in(DIALR), .rotary_pos(posr));
+
+    hex_to_7seg hex0(.hexval(posl[7:4]), .ledcode(HEX5));
+    hex_to_7seg hex1(.hexval(posl[3:0]), .ledcode(HEX4));
+    hex_to_7seg hex2(.hexval(posr[7:4]), .ledcode(HEX3));
+    hex_to_7seg hex3(.hexval(posr[3:0]), .ledcode(HEX2));
+
+    */
+
+    reg [3:0] pLength [0:11];
+    reg [15:0] prog [0:179];
+
+    initial begin
+      $readmemh("prog.txt", prog);
+      $readmemh("len.txt", pLength);
+    end
+
+    logic [3:0] pc0;
+    logic signed [10:0] acc [0:11];
+    logic signed [10:0] bak;
+
+    logic [3:0] pc1;
+
+    //core core0(.clk(CLOCK_50), .rst(rst), .pLength(pLength[0]), .prog(prog[0:14]), .pc(pc0), .acc(acc), .bak(bak));
+    //core core1(.clk(CLOCK_50), .rst(rst), .pLength(pLength[1]), .prog(prog[15:29]), .pc(pc1));
+
+    corecomplex ccx(.clk(CLOCK_50), .rst(rst), .pLength(pLength), .prog(prog), .acc(acc));
+
+    hex_to_7seg hex0(.hexval(acc[1][7:4]), .ledcode(HEX5));
+    hex_to_7seg hex1(.hexval(acc[1][3:0]), .ledcode(HEX4));
+    hex_to_7seg hex2(.hexval(acc[0][7:4]),  .ledcode(HEX3));
+    hex_to_7seg hex3(.hexval(acc[0][3:0]),  .ledcode(HEX2));
+
+
+    //logic [15:0] buttons;
+
+    //shiftregctl ctl0(.clock_50m(CLOCK_50), .reset(rst), .shiftreg_clk(SHIFT_CLKIN),
+      //        .shiftreg_loadn(SHIFT_LOAD), .shiftreg_out(SHIFT_OUT), .buttons(buttons));
+
+
+   /*
+   always_ff @(posedge clk or posedge rst) begin
       if (rst) begin
          memout <= 16'b1;
       end else begin
-			memout <= prog[0];
-		end
+         memout <= prog[0];
+      end
    end
-	*/
-	
-	 always_comb begin
-		rst = ~KEY[0];
-		clk = ~KEY[1];
-		//LEDR = {rst, buttons[15:12], buttons[7:3]};
-		LEDR = {clk, rst};
-	 end
+   */
+
+    always_comb begin
+      rst = ~KEY[0];
+      //clk = ~KEY[1];
+      //LEDR = {rst, buttons[15:12], buttons[7:3]};
+      //LEDR = {clk, rst};
+      LEDR = rst;
+    end
 endmodule
 
-  
