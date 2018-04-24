@@ -257,7 +257,7 @@ module toplevel(
     end
 
     logic [3:0] pc0;
-    logic signed [10:0] acc [0:3];
+    logic signed [10:0] acc [0:11];
     logic signed [10:0] bak;
 
     logic [3:0] pc1;
@@ -265,7 +265,7 @@ module toplevel(
     //core core0(.clk(CLOCK_50), .rst(rst), .pLength(pLength[0]), .prog(prog[0:14]), .pc(pc0), .acc(acc), .bak(bak));
     //core core1(.clk(CLOCK_50), .rst(rst), .pLength(pLength[1]), .prog(prog[15:29]), .pc(pc1));
 
-    row row0(.clk(CLOCK_50), .rst(rst), .pLength(pLength[0:3]), .prog(prog[0:59]), .acc(acc), .wreadyU(4'b0), .wreadyD(4'b0));
+    corecomplex ccx(.clk(CLOCK_50), .rst(rst), .pLength(pLength), .prog(prog), .acc(acc));
 
     hex_to_7seg hex0(.hexval(acc[1][7:4]), .ledcode(HEX5));
     hex_to_7seg hex1(.hexval(acc[1][3:0]), .ledcode(HEX4));
