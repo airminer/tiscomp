@@ -265,7 +265,7 @@ module toplevel(
     //core core0(.clk(CLOCK_50), .rst(rst), .pLength(pLength[0]), .prog(prog[0:14]), .pc(pc0), .acc(acc), .bak(bak));
     //core core1(.clk(CLOCK_50), .rst(rst), .pLength(pLength[1]), .prog(prog[15:29]), .pc(pc1));
 
-    row row0(.clk(CLOCK_50), .rst(rst), .pLength(pLength[0:3]), .prog(prog[0:59]), .acc(acc));
+    row row0(.clk(CLOCK_50), .rst(rst), .pLength(pLength[0:3]), .prog(prog[0:59]), .acc(acc), .wreadyU(4'b0), .wreadyD(4'b0));
 
     hex_to_7seg hex0(.hexval(acc[1][7:4]), .ledcode(HEX5));
     hex_to_7seg hex1(.hexval(acc[1][3:0]), .ledcode(HEX4));

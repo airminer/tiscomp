@@ -18,11 +18,7 @@ module tb_row
       $readmemh("len.txt", pLength);
    end
 
-   reg [3:0] wreg [0:3];
-   reg [3:0] rreg [0:3];
-   reg [10:0] out [0:3];
-   
-   row row0(.clk(clk), .rst(rst), .pLength(pLength[0:3]), .prog(prog[0:59]), .acc(acc));
+   row row0(.clk(clk), .rst(rst), .pLength(pLength[0:3]), .prog(prog[0:59]), .acc(acc), .wreadyU(4'b0), .wreadyD(4'b0));
 
    //reg [10:0] value;
    
@@ -35,7 +31,6 @@ module tb_row
 
    // initialise clock and generate a reset pulse
    initial begin
-      for(int i=0; i<4; i++) rreg[i] = 0;
       clk = 1;
       rst = 1;
       numerr = 0;
