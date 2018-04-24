@@ -62,7 +62,7 @@ module core (
          readU <= 0;
          readD <= 0;
       end
-      else begin
+      else if(pLength != 0) begin
          readL <= 0;
          readR <= 0;
          readU <= 0;
@@ -73,10 +73,10 @@ module core (
                if(write != 0) begin
                   if(prog[pc][13:11] == `DANY) begin
                      case(write)
-                        4'b0001: last <= 3'd0;
-                        4'b0010: last <= 3'd1;
-                        4'b0100: last <= 3'd2;
-                        4'b1000: last <= 3'd3;
+                        4'b0001: last <= `DLEFT;
+                        4'b0010: last <= `DRIGHT;
+                        4'b0100: last <= `DUP;
+                        4'b1000: last <= `DDOWN;
                      endcase
                   end
                   lastwrite <= write;
