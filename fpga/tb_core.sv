@@ -16,22 +16,28 @@ module tb_core
    output logic [10:0] acc1
    );
 
-   reg [3:0] pLength = 4'd4;
+   reg [3:0] pLength = 4'd2;
    reg [15:0] prog [0:179];
 
    initial begin
       $readmemh("mem.txt", prog);
    end
 
+   reg [3:0] wreg;
+   reg [3:0] rreg;
+   reg [10:0] out;
+
    core core0(.clk(clk), .rst(rst), .pLength(pLength), .prog(prog[0:14]), .acc(acc0),
-	    .rreadyL(1), .rreadyR(1), .rreadyU(1), .rreadyD(1), .left(1), .right(2), .up(3), .down(4));
-   //core core1(.clk(clk), .rst(rst), .pLength(pLength), .prog(prog[15:29]), .acc(acc1));
+      .write(wreg), .wready(rreg), .out(out));
+   core core1(.clk(clk), .rst(rst), .pLength(pLength), .prog(prog[15:29]), .acc(acc1),
+      .rreadyL(wreg[1]), .readL(rreg[1]), .left(out));
 
    int numerr;
    bit endtest;
 
    // initialise clock and generate a reset pulse
    initial begin
+      rreg = 0;
       clk = 1;
       rst = 1;
       numerr = 0;
