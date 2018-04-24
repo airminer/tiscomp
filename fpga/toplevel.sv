@@ -248,26 +248,29 @@ module toplevel(
 
     */
 
-    reg [3:0] pLength = 4'd4;
+    reg [3:0] pLength [0:11];
     reg [15:0] prog [0:179];
 
     initial begin
-      $readmemh("mem.txt", prog);
+      $readmemh("prog.txt", prog);
+      $readmemh("len.txt", pLength);
     end
 
     logic [3:0] pc0;
-    logic signed [10:0] acc;
+    logic signed [10:0] acc [0:3];
     logic signed [10:0] bak;
 
     logic [3:0] pc1;
 
-    core core0(.clk(CLOCK_50), .rst(rst), .pLength(pLength), .prog(prog[0:14]), .pc(pc0), .acc(acc), .bak(bak));
-    core core1(.clk(CLOCK_50), .rst(rst), .pLength(pLength), .prog(prog[15:29]), .pc(pc1));
+    //core core0(.clk(CLOCK_50), .rst(rst), .pLength(pLength[0]), .prog(prog[0:14]), .pc(pc0), .acc(acc), .bak(bak));
+    //core core1(.clk(CLOCK_50), .rst(rst), .pLength(pLength[1]), .prog(prog[15:29]), .pc(pc1));
 
-    hex_to_7seg hex0(.hexval(pc0), .ledcode(HEX5));
-    hex_to_7seg hex1(.hexval(pc1), .ledcode(HEX4));
-    hex_to_7seg hex2(.hexval(acc[7:4]),  .ledcode(HEX3));
-    hex_to_7seg hex3(.hexval(acc[3:0]),  .ledcode(HEX2));
+    row row0(.clk(CLOCK_50), .rst(rst), .pLength(pLength[0:3]), .prog(prog[0:59]), .acc(acc));
+
+    hex_to_7seg hex0(.hexval(acc[1][7:4]), .ledcode(HEX5));
+    hex_to_7seg hex1(.hexval(acc[1][3:0]), .ledcode(HEX4));
+    hex_to_7seg hex2(.hexval(acc[0][7:4]),  .ledcode(HEX3));
+    hex_to_7seg hex3(.hexval(acc[0][3:0]),  .ledcode(HEX2));
 
 
     //logic [15:0] buttons;
