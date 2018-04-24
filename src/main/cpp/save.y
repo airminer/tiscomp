@@ -34,9 +34,9 @@ lines:
     lines line
   | line;
 line:
-    instr ENDL { instrn++; popLabels(); }
+    instr ENDL { popLabels(); instrn++; }
   | LABEL ':' ENDL { pushLabel($1); }
-  | LABEL ':' instr ENDL { pushLabel($1); instrn++; popLabels(); }
+  | LABEL ':' instr ENDL { pushLabel($1); popLabels(); instrn++; }
   | ENDL;
 instr:
     INSTR0 { pushInstr($1); }
