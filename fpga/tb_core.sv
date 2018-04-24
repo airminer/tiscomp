@@ -11,28 +11,32 @@ module tb_core
    output logic [10:0] acc1
    );
 
-   reg [3:0] pLength = 4'd2;
+   reg [3:0] pLength [0:13];
    reg [15:0] prog [0:179];
 
    initial begin
-      $readmemh("mem.txt", prog);
+      $readmemh("prog.txt", prog);
+      $readmemh("len.txt", pLength);
    end
 
-   reg [3:0] wreg;
-   reg [3:0] rreg;
-   reg [10:0] out;
+   reg [3:0] wreg [0:1];
+   reg [3:0] rreg [0:1];
+   reg [10:0] out [0:1];
 
-   core core0(.clk(clk), .rst(rst), .pLength(pLength), .prog(prog[0:14]), .acc(acc0),
-      .write(wreg), .wready(rreg), .out(out));
-   core core1(.clk(clk), .rst(rst), .pLength(pLength), .prog(prog[15:29]), .acc(acc1),
-      .rreadyL(wreg[1]), .readL(rreg[1]), .left(out));
+   core core0(.clk(clk), .rst(rst), .pLength(pLength[0]), .prog(prog[0:14]), .acc(acc0),
+      .write(wreg[0]), .wready(rreg[0]), .out(out[0]),
+      .rreadyR(wreg[1][0]), .readR(rreg[1][0]), .right(out[1]));
+   stack stack0(.clk(clk), .rst(rst),
+      .write(wreg[1]), .wready(rreg[1]), .out(out[1]),
+      .rreadyL(wreg[0][1]), .readL(rreg[0][1]), .left(out[0]));
 
    int numerr;
    bit endtest;
 
    // initialise clock and generate a reset pulse
    initial begin
-      rreg = 0;
+      rreg[0] = 0;
+      rreg[1] = 0;
       clk = 1;
       rst = 1;
       numerr = 0;
