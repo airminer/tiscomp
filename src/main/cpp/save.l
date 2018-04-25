@@ -41,7 +41,7 @@ UP                      { yylval.ival = UP; return REG; }
 DOWN                    { yylval.ival = DOWN; return REG; }
 ANY                     { yylval.ival = ANY; return REG; }
 LAST                    { yylval.ival = LAST; return REG; }
-[0-9]+                  { yylval.ival = atoi(yytext); return INT;}
+-?[0-9]+                { yylval.ival = atoi(yytext); return INT;}
 \n                      { linenum++; return ENDL; }
 <LSTATE>\n              { linenum++; BEGIN(INITIAL); return ENDL; }
 [@:]                    { return yytext[0]; }
