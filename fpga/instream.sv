@@ -6,10 +6,9 @@ module instream (
    input signed [10:0] data [0:38],
    
    output reg write,
-   output reg [10:0] out
+   output reg [10:0] out,
+   output reg [5:0] pos
 );
-
-   reg [5:0] pos;
 
    always_ff @(posedge clk or posedge rst) begin
       if(rst) begin
@@ -20,12 +19,16 @@ module instream (
       else begin
          if(write)
             write <= 0;
-         else if (length != 0 && pos != length-6'd1) begin
-            write <= 1;
+         else if (length != pos) begin
             if(wready) begin
                pos <= pos + 6'd1;
-               out <= data[pos + 6'd1];
+               if(pos != length-1) begin
+                  out <= data[pos + 6'd1];
+                  write <= 1;
+               end
             end
+            else
+               write <= 1;
          end
       end
    end
