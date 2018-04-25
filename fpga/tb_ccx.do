@@ -8,6 +8,8 @@ vlog row.sv
 vlog corecomplex.sv
 vlog instream.sv
 vlog inrow.sv
+vlog outstream.sv
+vlog outrow.sv
 vlog tb_ccx.sv
 # point the simulator at the compiled design
 vsim work.tb_ccx
