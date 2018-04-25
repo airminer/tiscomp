@@ -34,7 +34,7 @@ module tb_ccx
 
    inrow inrow0(.clk(clk), .rst(rst), .length(sLength[0:3]), .data(sData[0:155]), .wready(readU), .write(rreadyU), .out(up));
    corecomplex ccx(.clk(clk), .rst(rst), .pLength(pLength), .prog(prog), .acc(acc), .stack(stack),
-      .rreadyU(rreadyU), .readU(readU), .up(up), .wreadyU('{4'b0, 4'b0, 4'b0, 4'b0}),
+      .rreadyU(rreadyU), .readU(readU), .up(up), .wreadyU(4'b0),
       .wreadyD(wreadyD), .writeD(writeD), .outD(outD)
    );
    outrow outrow0(.clk(clk), .rst(rst), .length(sLength[4:7]), .data(sData[156:311]), .rready(writeD), .read(wreadyD), .in(outD));

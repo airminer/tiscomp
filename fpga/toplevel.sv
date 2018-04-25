@@ -232,43 +232,64 @@ module toplevel(
     } buttonsT;
 
     wire rst;
-    //wire clk;
+    wire clk;
 
     reg [3:0] pLength [0:11];
     reg [15:0] prog [0:179];
     reg stack [0:11];
 
+    reg [5:0] sLength [0:7];
+    reg signed [10:0] sData [0:311];
+
+
     initial begin
       $readmemh("prog.txt", prog);
       $readmemh("len.txt", pLength);
       $readmemb("stack.txt", stack);
+      $readmemh("streams.txt", sData);
+      $readmemh("slen.txt", sLength);
     end
 
-    logic [3:0] pc0;
+    //logic [3:0] pc0;
     logic signed [10:0] acc [0:11];
-    logic signed [10:0] bak;
+    //logic signed [10:0] bak;
 
-    logic [3:0] pc1;
+    //logic [3:0] pc1;
 
-    corecomplex ccx(.clk(CLOCK_50), .rst(rst), .pLength(pLength), .prog(prog), .stack(stack), .acc(acc));
+
+    logic [3:0] rreadyU;
+    logic [3:0] readU;
+    logic [10:0] up [0:3];
+
+    logic [3:0] wreadyD;
+    logic [3:0] writeD;
+    logic [10:0] outD [0:3];
+
+    logic [3:0] complete;
+
+    inrow inrow0(.clk(clk), .rst(rst), .length(sLength[0:3]), .data(sData[0:155]), .wready(readU), .write(rreadyU), .out(up));
+    corecomplex ccx0(.clk(clk), .rst(rst), .pLength(pLength), .prog(prog), .acc(acc), .stack(stack),
+      .rreadyU(rreadyU), .readU(readU), .up(up), .wreadyU(4'b0),
+      .wreadyD(wreadyD), .writeD(writeD), .outD(outD)
+    );
+    outrow outrow0(.clk(clk), .rst(rst), .length(sLength[4:7]), .data(sData[156:311]), .rready(writeD), .read(wreadyD), .in(outD),
+       .complete(complete)
+    );
 
     hex_to_7seg hex0(.hexval(acc[1][7:4]), .ledcode(HEX5));
     hex_to_7seg hex1(.hexval(acc[1][3:0]), .ledcode(HEX4));
     hex_to_7seg hex2(.hexval(acc[0][7:4]),  .ledcode(HEX3));
     hex_to_7seg hex3(.hexval(acc[0][3:0]),  .ledcode(HEX2));
 
+    reg [7:0] SWD;
 
-    //logic [15:0] buttons;
-
-    //shiftregctl ctl0(.clock_50m(CLOCK_50), .reset(rst), .shiftreg_clk(SHIFT_CLKIN),
-      //        .shiftreg_loadn(SHIFT_LOAD), .shiftreg_out(SHIFT_OUT), .buttons(buttons));
+    //debounce db0(.clk(CLOCK_50), .bouncy_in(SW[0]), .clean_out(SWD[0]));
 
     always_comb begin
       rst = ~KEY[0];
-      //clk = ~KEY[1];
-      //LEDR = {rst, buttons[15:12], buttons[7:3]};
-      //LEDR = {clk, rst};
-      LEDR = rst;
+      //clk = SWD[0] ? CLOCK_50 : ~KEY[1];
+      clk = CLOCK_50;
+      LEDR = {complete[0], complete[1], complete[2], complete[3], 4'b0, clk, rst};
     end
 endmodule
 
