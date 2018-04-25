@@ -276,19 +276,31 @@ module toplevel(
        .complete(complete)
     );
 
-    hex_to_7seg hex0(.hexval(acc[1][7:4]), .ledcode(HEX5));
-    hex_to_7seg hex1(.hexval(acc[1][3:0]), .ledcode(HEX4));
-    hex_to_7seg hex2(.hexval(acc[0][7:4]),  .ledcode(HEX3));
-    hex_to_7seg hex3(.hexval(acc[0][3:0]),  .ledcode(HEX2));
+    reg [23:0] timer;
+
+    hex_to_7seg hs5(.hexval(timer[23:20]),  .ledcode(HEX5));
+    hex_to_7seg hs4(.hexval(timer[19:16]),  .ledcode(HEX4));
+    hex_to_7seg hs3(.hexval(timer[15:12]),  .ledcode(HEX3));
+    hex_to_7seg hs2(.hexval(timer[11:8]),  .ledcode(HEX2));
+    hex_to_7seg hs1(.hexval(timer[7:4]),  .ledcode(HEX1));
+    hex_to_7seg hs0(.hexval(timer[3:0]),  .ledcode(HEX0));
 
     reg [7:0] SWD;
+    debounce db0(.clk(CLOCK_50), .bouncy_in(SW[0]), .clean_out(SWD[0]));
 
-    //debounce db0(.clk(CLOCK_50), .bouncy_in(SW[0]), .clean_out(SWD[0]));
+    always_ff @(posedge clk or posedge rst) begin
+       if(rst) begin
+          timer <= 0;
+       end
+       else if(!(&complete | &timer)) begin
+          timer <= timer+1;
+       end
+    end
 
     always_comb begin
       rst = ~KEY[0];
-      //clk = SWD[0] ? CLOCK_50 : ~KEY[1];
-      clk = CLOCK_50;
+      clk = SWD[0] ? CLOCK_50 : ~KEY[1];
+      //clk = CLOCK_50;
       LEDR = {complete[0], complete[1], complete[2], complete[3], 4'b0, clk, rst};
     end
 endmodule
