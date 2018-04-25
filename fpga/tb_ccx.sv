@@ -9,18 +9,30 @@ module tb_ccx
    output logic [7:0]   count,
    output logic [10:0] acc [0:11]
    );
-   
+
    reg [3:0] pLength [0:11];
    reg [15:0] prog [0:179];
    reg stack [0:11];
+
+   reg [5:0] inLength;
+   reg [10:0] inData [0:63];
 
    initial begin
       $readmemh("prog.txt", prog);
       $readmemh("len.txt", pLength);
       $readmemb("stack.txt", stack);
+      inLength = 5;
+      for(int i=0; i<5; i++) inData[i] = i;
    end
 
-   corecomplex ccx(.clk(clk), .rst(rst), .pLength(pLength), .prog(prog), .acc(acc), .stack(stack), .wreadyU('{4'b0, 4'b0, 4'b0, 4'b0}), .wreadyD('{4'b0, 4'b0, 4'b0, 4'b0}));
+   logic [3:0] rreadyU;
+   logic [3:0] readU;
+   logic [10:0] up [0:3];
+
+   instream in0(.clk(clk), .rst(rst), .length(inLength), .data(inData), .wready(readU[0]), .write(rreadyU[0]), .out(up[0]));
+   corecomplex ccx(.clk(clk), .rst(rst), .pLength(pLength), .prog(prog), .acc(acc), .stack(stack),
+   .rreadyU(rreadyU), .readU(readU), .up(up),
+   .wreadyU('{4'b0, 4'b0, 4'b0, 4'b0}), .wreadyD('{4'b0, 4'b0, 4'b0, 4'b0}));
 
    //reg [10:0] value;
    

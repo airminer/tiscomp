@@ -1,8 +1,8 @@
 module sink (
    input wire clk,
    input wire rst,
-   input reg rready,
-   input reg [10:0] in,
+   input rready,
+   input [10:0] in,
    
    output reg read,
    output reg [10:0] value
