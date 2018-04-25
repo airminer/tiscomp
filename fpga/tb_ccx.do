@@ -2,6 +2,8 @@
 vlib work
 # compile our SystemVerilog files
 vlog core.sv
+vlog stack.sv
+vlog node.sv
 vlog row.sv
 vlog corecomplex.sv
 vlog tb_ccx.sv

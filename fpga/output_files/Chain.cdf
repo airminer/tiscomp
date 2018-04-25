@@ -6,7 +6,7 @@ JedecChain;
 	P ActionCode(Ign)
 		Device PartName(SOCVHPS) MfrSpec(OpMask(0));
 	P ActionCode(Cfg)
-		Device PartName(5CSEMA5F31) Path("/home/ecad/Desktop/project/output_files/") File("toplevel.sof") MfrSpec(OpMask(1));
+		Device PartName(5CSEMA5F31) Path("/home/ecad/Desktop/project/fpga/output_files/") File("toplevel.sof") MfrSpec(OpMask(1));
 
 ChainEnd;
 

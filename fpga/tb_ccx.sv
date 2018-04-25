@@ -12,13 +12,15 @@ module tb_ccx
    
    reg [3:0] pLength [0:11];
    reg [15:0] prog [0:179];
+   reg stack [0:11];
 
    initial begin
       $readmemh("prog.txt", prog);
       $readmemh("len.txt", pLength);
+      $readmemb("stack.txt", stack);
    end
 
-   corecomplex ccx(.clk(clk), .rst(rst), .pLength(pLength), .prog(prog), .acc(acc), .wreadyU('{4'b0, 4'b0, 4'b0, 4'b0}), .wreadyD('{4'b0, 4'b0, 4'b0, 4'b0}));
+   corecomplex ccx(.clk(clk), .rst(rst), .pLength(pLength), .prog(prog), .acc(acc), .stack(stack), .wreadyU('{4'b0, 4'b0, 4'b0, 4'b0}), .wreadyD('{4'b0, 4'b0, 4'b0, 4'b0}));
 
    //reg [10:0] value;
    

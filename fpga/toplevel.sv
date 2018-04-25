@@ -250,10 +250,12 @@ module toplevel(
 
     reg [3:0] pLength [0:11];
     reg [15:0] prog [0:179];
+    reg stack [0:11];
 
     initial begin
       $readmemh("prog.txt", prog);
       $readmemh("len.txt", pLength);
+      $readmemb("stack.txt", stack);
     end
 
     logic [3:0] pc0;
@@ -265,7 +267,7 @@ module toplevel(
     //core core0(.clk(CLOCK_50), .rst(rst), .pLength(pLength[0]), .prog(prog[0:14]), .pc(pc0), .acc(acc), .bak(bak));
     //core core1(.clk(CLOCK_50), .rst(rst), .pLength(pLength[1]), .prog(prog[15:29]), .pc(pc1));
 
-    corecomplex ccx(.clk(CLOCK_50), .rst(rst), .pLength(pLength), .prog(prog), .acc(acc));
+    corecomplex ccx(.clk(CLOCK_50), .rst(rst), .pLength(pLength), .prog(prog), .stack(stack), .acc(acc));
 
     hex_to_7seg hex0(.hexval(acc[1][7:4]), .ledcode(HEX5));
     hex_to_7seg hex1(.hexval(acc[1][3:0]), .ledcode(HEX4));

@@ -2,6 +2,8 @@
 vlib work
 # compile our SystemVerilog files
 vlog core.sv
+vlog stack.sv
+vlog node.sv
 vlog row.sv
 vlog tb_row.sv
 # point the simulator at the compiled design
