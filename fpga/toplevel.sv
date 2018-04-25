@@ -234,20 +234,6 @@ module toplevel(
     wire rst;
     //wire clk;
 
-    /*
-    logic [7:0] posl;
-    logic [7:0] posr;
-
-    rotary rotary0(.clk(CLOCK_50), .rst(rst), .rotary_in(DIALL), .rotary_pos(posl));
-    rotary rotary1(.clk(CLOCK_50), .rst(rst), .rotary_in(DIALR), .rotary_pos(posr));
-
-    hex_to_7seg hex0(.hexval(posl[7:4]), .ledcode(HEX5));
-    hex_to_7seg hex1(.hexval(posl[3:0]), .ledcode(HEX4));
-    hex_to_7seg hex2(.hexval(posr[7:4]), .ledcode(HEX3));
-    hex_to_7seg hex3(.hexval(posr[3:0]), .ledcode(HEX2));
-
-    */
-
     reg [3:0] pLength [0:11];
     reg [15:0] prog [0:179];
     reg stack [0:11];
@@ -264,9 +250,6 @@ module toplevel(
 
     logic [3:0] pc1;
 
-    //core core0(.clk(CLOCK_50), .rst(rst), .pLength(pLength[0]), .prog(prog[0:14]), .pc(pc0), .acc(acc), .bak(bak));
-    //core core1(.clk(CLOCK_50), .rst(rst), .pLength(pLength[1]), .prog(prog[15:29]), .pc(pc1));
-
     corecomplex ccx(.clk(CLOCK_50), .rst(rst), .pLength(pLength), .prog(prog), .stack(stack), .acc(acc));
 
     hex_to_7seg hex0(.hexval(acc[1][7:4]), .ledcode(HEX5));
@@ -279,17 +262,6 @@ module toplevel(
 
     //shiftregctl ctl0(.clock_50m(CLOCK_50), .reset(rst), .shiftreg_clk(SHIFT_CLKIN),
       //        .shiftreg_loadn(SHIFT_LOAD), .shiftreg_out(SHIFT_OUT), .buttons(buttons));
-
-
-   /*
-   always_ff @(posedge clk or posedge rst) begin
-      if (rst) begin
-         memout <= 16'b1;
-      end else begin
-         memout <= prog[0];
-      end
-   end
-   */
 
     always_comb begin
       rst = ~KEY[0];
