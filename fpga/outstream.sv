@@ -25,14 +25,14 @@ module outstream (
          if(read)
             read <= 0;
          else if(pos == length) 
-			   complete <= 1;
+			   complete <= errors == 0;
 			else if(rready) begin
             read <= 1;
             value <= in;
             if(in != data[pos])
                errors = errors + 1;
             else if(pos == length-1)
-               complete <= 1;
+               complete <= errors == 0;
             pos <= pos+1;
          end
       end
