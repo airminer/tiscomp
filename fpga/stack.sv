@@ -42,7 +42,8 @@ module stack (
          readD <= 0;
          if(depth != 0 && write == 0) begin
             if((wready & lastwrite) != 0) begin
-               out <= stack[depth-1];
+               if(depth != 1)
+                  out <= stack[depth-2];
                lastwrite <= 4'b0100; //UP
                depth <= depth-1;
             end 
