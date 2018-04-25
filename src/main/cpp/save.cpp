@@ -21,6 +21,8 @@ Core* core = NULL;
 Instr::Instr(const int line, const int type, const int src, const int dest, const int label) : line(line),  type(type), src(src), dest(dest), label(label) {}
 Core::Core(const int corenum) : corenum(corenum) {}
 
+Stream::Stream(const int type) : type(type) {}
+
 void pushLabel(char* lc) {
 	std::string l(lc);
 	if (labels.count(l) || std::find(floating.begin(), floating.end(), l) != floating.end()) {

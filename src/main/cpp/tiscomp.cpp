@@ -31,13 +31,6 @@ void yyerror(const char *s, ...) {
 	exit(1);
 }
 
-enum TIS_TILE {
-	TILE_COMPUTE = 1000,
-	TILE_MEMORY = 1001,
-	TILE_DAMAGED = 1002,
-	TILE_JOURNAL = 1003
-};
-
 void setnil(lua_State *L, const char* s) {
 	lua_pushnil(L);
 	lua_setfield(L, -2, s);
@@ -162,9 +155,9 @@ int main(int argc, char* argv[]) {
 	setint(L, "TILE_MEMORY", TILE_MEMORY);
 	setint(L, "TILE_DAMAGED", TILE_DAMAGED);
 	setint(L, "TILE_JOURNAL", TILE_JOURNAL);
-	setint(L, "STREAM_INPUT", 2000);
-	setint(L, "STREAM_OUTPUT", 2001);
-	setint(L, "STREAM_IMAGE", 2002);
+	setint(L, "STREAM_INPUT", STREAM_INPUT);
+	setint(L, "STREAM_OUTPUT", STREAM_OUTPUT);
+	setint(L, "STREAM_IMAGE", STREAM_IMAGE);
 
 	if (luaL_loadfile(L, file)) {
 		fprintf(stderr, "Couldn't load file: %s\n", lua_tostring(L, -1));
@@ -219,6 +212,104 @@ int main(int argc, char* argv[]) {
 		case TILE_MEMORY:
 			memory[m++] = i-1; break;
 		}
+	}
+
+	lua_remove(L, -1);
+
+	lua_getfield(L, -1, "get_streams");
+	if (lua_pcall(L, 0, 1, 0)) {
+		fprintf(stderr, "Failed to call get_streams(): %s\n", lua_tostring(L, -1));
+		exit(1);
+	}
+
+	if (!lua_istable(L, -1)) {
+		fprintf(stderr, "Failed to get layout: get_streams() returned a value of type %s\n", lua_typename(L, lua_type(L, -1)));
+		exit(1);
+	}
+
+	l = lua_rawlen(L, -1);
+
+	std::vector<Stream> inStreams(4, Stream(STREAM_INPUT));
+	std::vector<Stream> outStreams(4, Stream(STREAM_OUTPUT));
+
+	for (int i = 1; (unsigned) i <= l; i++) {
+		lua_rawgeti(L, -1, i);
+		if (!lua_istable(L, -1)) {
+			fprintf(stderr, "Failed to get streams: element %d of get_streams() is of type %s\n", i, lua_typename(L, lua_type(L, -1)));
+			exit(1);
+		}
+
+		size_t len;
+
+		if ((len = lua_rawlen(L, -1)) != 4) {
+			fprintf(stderr, "Failed to get streams: element %d of get_streams() is of length %ld\n", i, len);
+			exit(1);
+		}
+
+		lua_rawgeti(L, -1, 1);
+		if (!lua_isnumber(L, -1)) {
+			fprintf(stderr, "Failed to get streams: element 1 of get_streams()[%d] is of type %s\n", i, lua_typename(L, lua_type(L, -1)));
+			exit(1);
+		}
+
+		lua_Integer type = lua_tointeger(L, -1);
+		if (type < STREAM_INPUT || type > STREAM_OUTPUT) {
+			fprintf(stderr, "Failed to get streams: element %d of get_streams() is not a valid stream type(%ld)\n", i, type);
+			exit(1);
+		}
+
+		lua_remove(L, -1);
+
+		lua_rawgeti(L, -1, 3);
+		if (!lua_isnumber(L, -1)) {
+			fprintf(stderr, "Failed to get streams: element 3 of get_streams()[%d] is of type %s\n", i, lua_typename(L, lua_type(L, -1)));
+			exit(1);
+		}
+
+		lua_Integer pos = lua_tointeger(L, -1);
+		if (pos < 0 || pos > 3) {
+			fprintf(stderr, "Failed to get streams: element %d of get_streams() is not a valid position(%ld)\n", i, pos);
+			exit(1);
+		}
+
+		lua_remove(L, -1);
+
+		lua_rawgeti(L, -1, 4);
+		if (!lua_istable(L, -1)) {
+			fprintf(stderr, "Failed to get streams: element 4 of get_streams()[%d] is of type %s\n", i, lua_typename(L, lua_type(L, -1)));
+			exit(1);
+		}
+
+		len = lua_rawlen(L, -1);
+		if (len > 39) {
+			fprintf(stderr, "Failed to get streams: element 4 of get_streams()[%d] is longer than 39 elements (%ld)\n", i, len);
+			exit(1);
+		}
+
+		for (int j = 1; (unsigned) j <= len; j++) {
+			lua_rawgeti(L, -1, j);
+			if (!lua_isnumber(L, -1)) {
+				fprintf(stderr, "Failed to get streams: element %d of get_streams()[%d][4] is of type %s\n", j, i, lua_typename(L, lua_type(L, -1)));
+				exit(1);
+			}
+
+			lua_Integer val = lua_tointeger(L, -1);
+			if (val < -999 || val > 999) {
+				fprintf(stderr, "Failed to get streams: element %d of get_streams()[%d][4] is not a valid value(%ld)\n", j, i, val);
+				exit(1);
+			}
+			lua_remove(L, -1);
+
+			if (type == STREAM_INPUT) {
+				inStreams[pos].data.push_back(val);
+			} else {
+				outStreams[pos].data.push_back(val);
+			}
+		}
+
+		lua_remove(L, -1);
+		lua_remove(L, -1);
+
 	}
 
 	lua_settop(L, 0);
@@ -350,6 +441,48 @@ int main(int argc, char* argv[]) {
 	fclose(lentxt);
 	fclose(stacktxt);
 	fclose(progtxt);
+
+	FILE *streamstxt = fopen("streams.txt", "w");
+
+	if (!streamstxt) {
+		fprintf(stderr, "Couldn't open output file: streams.txt\n");
+		return 1;
+	}
+
+	FILE *slentxt = fopen("slen.txt", "w");
+
+	if (!slentxt) {
+		fprintf(stderr, "Couldn't open output file: slen.txt\n");
+		return 1;
+	}
+
+	for (Stream s : inStreams) {
+		fprintf(slentxt, "%02lX\n", s.data.size());
+		size_t i = 0;
+		while (i < s.data.size()) {
+			fprintf(streamstxt, "%03X\n", s.data[i] & 0x7FF);
+			i++;
+		}
+		while (i < 39) {
+			fprintf(streamstxt, "000\n");
+			i++;
+		}
+	}
+	for (Stream s : outStreams) {
+		fprintf(slentxt, "%02lX\n", s.data.size());
+		size_t i = 0;
+		while (i < s.data.size()) {
+			fprintf(streamstxt, "%03X\n", s.data[i] & 0x7FF);
+			i++;
+		}
+		while (i < 39) {
+			fprintf(streamstxt, "000\n");
+			i++;
+		}
+	}
+
+	fclose(streamstxt);
+	fclose(slentxt);
 
     return 0;
 }
