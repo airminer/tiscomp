@@ -260,7 +260,7 @@ int main(int argc, char* argv[]) {
 
 	Core* disabled = new Core(-1);
 
-	//Core* stack = new Core(-2);
+	Core* stack = new Core(-2);
 
 	std::vector<Core*> renum(12, disabled);
 
@@ -268,11 +268,9 @@ int main(int argc, char* argv[]) {
 		renum[compute[i]] = cores[i];
 	}
 
-	/*
 	for (size_t i = 0; i < m; i++) {
 		renum[memory[i]] = stack;
 	}
-	*/
 
 	printf("\n");
 
@@ -304,11 +302,12 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
-	for (Core* c : renum) {
-		fprintf(lentxt, "%lX\n", c->instr.size());
-	}
+	FILE *stacktxt = fopen("stack.txt", "w");
 
-	fclose(lentxt);
+	if (!stacktxt) {
+		fprintf(stderr, "Couldn't open output file: stack.txt\n");
+		return 1;
+	}
 
 	FILE *progtxt = fopen("prog.txt", "w");
 
@@ -318,6 +317,8 @@ int main(int argc, char* argv[]) {
 	}
 
 	for (Core* c : renum) {
+		fprintf(lentxt, "%lX\n", c->instr.size());
+		fprintf(stacktxt, (c == stack) ? "1\n" : "0\n");
 		size_t i = 0;
 		while (i < c->instr.size()) {
 			uint16_t r = (uint16_t) c->instr[i]->type;
@@ -346,6 +347,8 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
+	fclose(lentxt);
+	fclose(stacktxt);
 	fclose(progtxt);
 
     return 0;
