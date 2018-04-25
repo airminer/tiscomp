@@ -3,7 +3,7 @@ module instream (
    input wire rst,
    input wready,
    input [5:0] length,
-   input signed [10:0] data [0:63],
+   input signed [10:0] data [0:38],
    
    output reg write,
    output reg [10:0] out
