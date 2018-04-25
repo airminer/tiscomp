@@ -38,19 +38,27 @@ module core (
    output reg readU,
    output reg readD,
 
-   output reg [3:0] pc,
+   output logic [3:0] pc,
    output reg signed [10:0] acc,
    output reg signed [10:0] bak
    );
 
-   //REGISTERS
-
    reg [2:0] last;
    reg [3:0] lastwrite;
+   reg [3:0] pcReg;
+
+   always_comb
+      if(((write | lastwrite) & wready) != 0)
+         if(pcReg == pLength-1)
+            pc = 0;
+         else
+            pc = pcReg+1;
+      else
+         pc = pcReg;
 
    always_ff @(posedge clk or posedge rst) begin
       if (rst) begin
-         pc <= 0;
+         pcReg <= 0;
          acc <= 0;
          bak <= 0;
          last <= `DNIL;
@@ -68,49 +76,41 @@ module core (
          readU <= 0;
          readD <= 0;
 
-         if((write | lastwrite) != 0) begin
-            if(((write | lastwrite) & wready) == 0) begin
-               if(write != 0) begin
-                  if(prog[pc][13:11] == `DANY) begin
-                     case(write)
-                        4'b0001: last <= `DLEFT;
-                        4'b0010: last <= `DRIGHT;
-                        4'b0100: last <= `DUP;
-                        4'b1000: last <= `DDOWN;
-                     endcase
-                  end
-                  lastwrite <= write;
-                  write <= 0;
+         if(((write | lastwrite) != 0) && (((write | lastwrite) & wready) == 0)) begin
+            if(write != 0) begin
+               if(prog[pc][13:11] == `DANY) begin
+                  case(write)
+                     4'b0001: last <= `DLEFT;
+                     4'b0010: last <= `DRIGHT;
+                     4'b0100: last <= `DUP;
+                     4'b1000: last <= `DDOWN;
+                  endcase
                end
-               else begin
-                  if(prog[pc][13:11] == `DANY) begin
-                     case(lastwrite)
-                        4'b0001: write <= 4'b0010;
-                        4'b0010: write <= 4'b1000;
-                        4'b0100: write <= 4'b0001;
-                        4'b1000: write <= 4'b0100;
-                     endcase
-                  end
-                  else begin
-                     write <= lastwrite;
-                  end
-                  lastwrite <= 0;
-               end
+               lastwrite <= write;
+               write <= 0;
             end
             else begin
-               write <= 0;
+               if(prog[pc][13:11] == `DANY) begin
+                  case(lastwrite)
+                     4'b0001: write <= 4'b0010;
+                     4'b0010: write <= 4'b1000;
+                     4'b0100: write <= 4'b0001;
+                     4'b1000: write <= 4'b0100;
+                  endcase
+               end
+               else begin
+                  write <= lastwrite;
+               end
                lastwrite <= 0;
-               if(pc == pLength-1)
-                  pc <= 0;
-               else
-                  pc <= pc+1;
             end
          end
          else begin
+            write <= 0;
+            lastwrite <= 0;
             if(pc == pLength-1)
-               pc <= 0;
+               pcReg <= 0;
             else
-               pc <= pc+1;
+               pcReg <= pc+1;
 
             if(!prog[pc][14]) begin //MOV
                if(signed'(prog[pc][10:0]) > 11'sd999) begin
@@ -119,7 +119,7 @@ module core (
                         acc <= 0;
                      else if((prog[pc][13:11] != `DNIL) && ((prog[pc][13:11] != `DLAST) || (last != `DNIL))) begin
                         out <= 0;
-                        pc <= pc;
+                        pcReg <= pc;
                         if(prog[pc][13:11] == `DANY)
                            write[2] <= 1; //UP
                         else if(prog[pc][13:11] == `DLAST)
@@ -131,7 +131,7 @@ module core (
                   else if(prog[pc][10:0] == `ACC) begin //ACC
                      if((prog[pc][13:11] != `DACC) && (prog[pc][13:11] != `DNIL) && ((prog[pc][13:11] != `DLAST) || (last != `DNIL))) begin
                         out <= acc;
-                        pc <= pc;
+                        pcReg <= pc;
                         if(prog[pc][13:11] == `DANY)
                            write[2] <= 1; //UP
                         else if(prog[pc][13:11] == `DLAST)
@@ -149,7 +149,7 @@ module core (
                            acc <= left;
                         else if((prog[pc][13:11] != `DNIL) && ((prog[pc][13:11] != `DLAST) || (last != `DNIL))) begin
                            out <= left;
-                           pc <= pc;
+                           pcReg <= pc;
                            if(prog[pc][13:11] == `DANY)
                               write[2] <= 1; //UP
                            else if(prog[pc][13:11] == `DLAST)
@@ -159,7 +159,7 @@ module core (
                         end
                      end
                      else begin
-                        pc <= pc;
+                        pcReg <= pc;
                      end
                   end
                   else if((prog[pc][10:0] == `RIGHT) || ((prog[pc][10:0] == `ANY) && rreadyR) || ((prog[pc][10:0] == `LAST) && (last == `DRIGHT))) begin //RIGHT
@@ -171,7 +171,7 @@ module core (
                            acc <= right;
                         else if((prog[pc][13:11] != `DNIL) && ((prog[pc][13:11] != `DLAST) || (last != `DNIL))) begin
                            out <= right;
-                           pc <= pc;
+                           pcReg <= pc;
                            if(prog[pc][13:11] == `DANY)
                               write[2] <= 1; //UP
                            else if(prog[pc][13:11] == `DLAST)
@@ -181,7 +181,7 @@ module core (
                         end
                      end
                      else begin
-                        pc <= pc;
+                        pcReg <= pc;
                      end
                   end
                   else if((prog[pc][10:0] == `UP) || ((prog[pc][10:0] == `ANY) && rreadyU) || ((prog[pc][10:0] == `LAST) && (last == `DUP))) begin //UP
@@ -193,7 +193,7 @@ module core (
                            acc <= up;
                         else if((prog[pc][13:11] != `DNIL) && ((prog[pc][13:11] != `DLAST) || (last != `DNIL))) begin
                            out <= up;
-                           pc <= pc;
+                           pcReg <= pc;
                            if(prog[pc][13:11] == `DANY)
                               write[2] <= 1; //UP
                            else if(prog[pc][13:11] == `DLAST)
@@ -203,7 +203,7 @@ module core (
                         end
                      end
                      else begin
-                        pc <= pc;
+                        pcReg <= pc;
                      end
                   end
                   else if((prog[pc][10:0] == `DOWN) || (prog[pc][10:0] == `ANY) || ((prog[pc][10:0] == `LAST) && (last == `DDOWN))) begin //DOWN
@@ -215,7 +215,7 @@ module core (
                            acc <= down;
                         else if((prog[pc][13:11] != `DNIL) && ((prog[pc][13:11] != `DLAST) || (last != `DNIL))) begin
                            out <= down;
-                           pc <= pc;
+                           pcReg <= pc;
                            if(prog[pc][13:11] == `DANY)
                               write[2] <= 1; //UP
                            else if(prog[pc][13:11] == `DLAST)
@@ -225,7 +225,7 @@ module core (
                         end
                      end
                      else begin
-                        pc <= pc;
+                        pcReg <= pc;
                      end
                   end
                end
@@ -234,7 +234,7 @@ module core (
                         acc <= signed'(prog[pc][10:0]);
                      else if((prog[pc][13:11] != `DNIL) && ((prog[pc][13:11] != `DLAST) || (last != `DNIL))) begin
                         out <= signed'(prog[pc][10:0]);
-                        pc <= pc;
+                        pcReg <= pc;
                         if(prog[pc][13:11] == `DANY)
                            write[2] <= 1; //UP
                         else if(prog[pc][13:11] == `DLAST)
@@ -263,7 +263,7 @@ module core (
                                   last <= `DLEFT;
                            end
                            else begin
-                              pc <= pc;
+                              pcReg <= pc;
                            end
                         end
                         else if((prog[pc][10:0] == `RIGHT) || ((prog[pc][10:0] == `ANY) && rreadyR) || ((prog[pc][10:0] == `LAST) && (last == `DRIGHT))) begin //RIGHT
@@ -276,7 +276,7 @@ module core (
                                   last <= `DRIGHT;
                            end
                            else begin
-                              pc <= pc;
+                              pcReg <= pc;
                            end
                         end
                         else if((prog[pc][10:0] == `UP) || ((prog[pc][10:0] == `ANY) && rreadyU) || ((prog[pc][10:0] == `LAST) && (last == `DUP))) begin //UP
@@ -289,7 +289,7 @@ module core (
                                   last <= `DUP;
                            end
                            else begin
-                              pc <= pc;
+                              pcReg <= pc;
                            end
                         end
                         else if((prog[pc][10:0] == `DOWN) || (prog[pc][10:0] == `ANY) || ((prog[pc][10:0] == `LAST) && (last == `DDOWN))) begin //DOWN
@@ -302,7 +302,7 @@ module core (
                                   last <= `DDOWN;
                            end
                            else begin
-                              pc <= pc;
+                              pcReg <= pc;
                            end
                         end
                      end
@@ -326,7 +326,7 @@ module core (
                                   last <= `DLEFT;
                            end
                            else begin
-                              pc <= pc;
+                              pcReg <= pc;
                            end
                         end
                         else if((prog[pc][10:0] == `RIGHT) || ((prog[pc][10:0] == `ANY) && rreadyR) || ((prog[pc][10:0] == `LAST) && (last == `DRIGHT))) begin //RIGHT
@@ -339,7 +339,7 @@ module core (
                                   last <= `DRIGHT;
                            end
                            else begin
-                              pc <= pc;
+                              pcReg <= pc;
                            end
                         end
                         else if((prog[pc][10:0] == `UP) || ((prog[pc][10:0] == `ANY) && rreadyU) || ((prog[pc][10:0] == `LAST) && (last == `DUP))) begin //UP
@@ -352,7 +352,7 @@ module core (
                                   last <= `DUP;
                            end
                            else begin
-                              pc <= pc;
+                              pcReg <= pc;
                            end
                         end
                         else if((prog[pc][10:0] == `DOWN) || (prog[pc][10:0] == `ANY) || ((prog[pc][10:0] == `LAST) && (last == `DDOWN))) begin //DOWN
@@ -365,7 +365,7 @@ module core (
                                   last <= `DDOWN;
                            end
                            else begin
-                              pc <= pc;
+                              pcReg <= pc;
                            end
                         end
                      end
@@ -375,85 +375,85 @@ module core (
                         else acc <= acc - signed'(prog[pc][10:0]);
                      end
                   3'b110: //JRO
-						   if(signed'(prog[pc][10:0]) > 11'sd999) begin
-							   if(prog[pc][10:0] == `NIL ) begin //NIL
-                           pc <= 0;
-								end
+                     if(signed'(prog[pc][10:0]) > 11'sd999) begin
+                        if(prog[pc][10:0] == `NIL ) begin //NIL
+                           pcReg <= 0;
+                        end
                         else if(prog[pc][10:0] == `ACC ) begin //ACC
-                           if((signed'(5'(pc)) + acc) > signed'(5'(pLength-1))) pc <= pLength-1;
-                           else if((signed'(5'(pc)) + acc) < 5'sd0) pc <= 0;
-                           else pc <= signed'(5'(pc)) + acc;
+                           if((signed'(5'(pc)) + acc) > signed'(5'(pLength-1))) pcReg <= pLength-1;
+                           else if((signed'(5'(pc)) + acc) < 5'sd0) pcReg <= 0;
+                           else pcReg <= signed'(5'(pc)) + acc;
                         end
                         else if((prog[pc][10:0] == `LEFT) || ((prog[pc][10:0] == `ANY) && rreadyL) || ((prog[pc][10:0] == `LAST) && (last == `DLEFT))) begin //LEFT
                            if(rreadyL) begin
                               readL <= 1;
-                              if((signed'(5'(pc)) + left) > signed'(5'(pLength-1))) pc <= pLength-1;
-                              else if((signed'(5'(pc)) + left) < 5'sd0) pc <= 0;
-                              else pc <= signed'(5'(pc)) + left;
+                              if((signed'(5'(pc)) + left) > signed'(5'(pLength-1))) pcReg <= pLength-1;
+                              else if((signed'(5'(pc)) + left) < 5'sd0) pcReg <= 0;
+                              else pcReg <= signed'(5'(pc)) + left;
                               if(prog[pc][10:0] == `ANY)
                                   last <= `DLEFT;
                            end
                            else begin
-                              pc <= pc;
+                              pcReg <= pc;
                            end
                         end
                         else if((prog[pc][10:0] == `RIGHT) || ((prog[pc][10:0] == `ANY) && rreadyR) || ((prog[pc][10:0] == `LAST) && (last == `DRIGHT))) begin //RIGHT
                            if(rreadyR) begin
                               readR <= 1;
-                              if((signed'(5'(pc)) + right) > signed'(5'(pLength-1))) pc <= pLength-1;
-                              else if((signed'(5'(pc)) + right) < 5'sd0) pc <= 0;
-                              else pc <= signed'(5'(pc)) + right;
+                              if((signed'(5'(pc)) + right) > signed'(5'(pLength-1))) pcReg <= pLength-1;
+                              else if((signed'(5'(pc)) + right) < 5'sd0) pcReg <= 0;
+                              else pcReg <= signed'(5'(pc)) + right;
                               if(prog[pc][10:0] == `ANY)
                                   last <= `DRIGHT;
                            end
                            else begin
-                              pc <= pc;
+                              pcReg <= pc;
                            end
                         end
                         else if((prog[pc][10:0] == `UP) || ((prog[pc][10:0] == `ANY) && rreadyU) || ((prog[pc][10:0] == `LAST) && (last == `DUP))) begin //UP
                            if(rreadyU) begin
                               readU <= 1;
-                              if((signed'(5'(pc)) + up) > signed'(5'(pLength-1))) pc <= pLength-1;
-                              else if((signed'(5'(pc)) + up) < 5'sd0) pc <= 0;
-                              else pc <= signed'(5'(pc)) + up;
+                              if((signed'(5'(pc)) + up) > signed'(5'(pLength-1))) pcReg <= pLength-1;
+                              else if((signed'(5'(pc)) + up) < 5'sd0) pcReg <= 0;
+                              else pcReg <= signed'(5'(pc)) + up;
                               if(prog[pc][10:0] == `ANY)
                                   last <= `DUP;
                            end
                            else begin
-                              pc <= pc;
+                              pcReg <= pc;
                            end
                         end
                         else if((prog[pc][10:0] == `DOWN) || (prog[pc][10:0] == `ANY) || ((prog[pc][10:0] == `LAST) && (last == `DDOWN))) begin //DOWN
                            if(rreadyD) begin
                               readD <= 1;
-                              if((signed'(5'(pc)) + down) > signed'(5'(pLength-1))) pc <= pLength-1;
-                              else if((signed'(5'(pc)) + down) < 5'sd0) pc <= 0;
-                              else pc <= signed'(5'(pc)) + down;
+                              if((signed'(5'(pc)) + down) > signed'(5'(pLength-1))) pcReg <= pLength-1;
+                              else if((signed'(5'(pc)) + down) < 5'sd0) pcReg <= 0;
+                              else pcReg <= signed'(5'(pc)) + down;
                               if(prog[pc][10:0] == `ANY)
                                   last <= `DDOWN;
                            end
                            else begin
-                              pc <= pc;
+                              pcReg <= pc;
                            end
                         end
                      end
                      else begin
-                        if(signed'(5'(pc)) + signed'(prog[pc][10:0]) > signed'(5'(pLength-1))) pc <= pLength-1;
-                        else if(signed'(5'(pc)) + signed'(prog[pc][10:0]) < 5'sd0) pc <= 0;
-                        else pc <= signed'(5'(pc)) + signed'(prog[pc][10:0]);
+                        if(signed'(5'(pc)) + signed'(prog[pc][10:0]) > signed'(5'(pLength-1))) pcReg <= pLength-1;
+                        else if(signed'(5'(pc)) + signed'(prog[pc][10:0]) < 5'sd0) pcReg <= 0;
+                        else pcReg <= signed'(5'(pc)) + signed'(prog[pc][10:0]);
                      end
                   3'b111:
                      case(prog[pc][10:4])
                         7'b1111010: //JMP
-                           pc <= prog[pc][3:0];
+                           pcReg <= prog[pc][3:0];
                         7'b1111011: //JEZ
-                           if(acc == 11'sb0) pc <= prog[pc][3:0];
+                           if(acc == 11'sb0) pcReg <= prog[pc][3:0];
                         7'b1111100: //JNZ
-                           if(acc != 11'sb0) pc <= prog[pc][3:0];
+                           if(acc != 11'sb0) pcReg <= prog[pc][3:0];
                         7'b1111101: //JGZ
-                           if(acc > 11'sb0) pc <= prog[pc][3:0];
+                           if(acc > 11'sb0) pcReg <= prog[pc][3:0];
                         7'b1111110: //JLZ
-                           if(acc < 11'sb0) pc <= prog[pc][3:0];
+                           if(acc < 11'sb0) pcReg <= prog[pc][3:0];
                         7'b1111111:
                            case(prog[pc][3:0])
                               4'b1100: //SWP
