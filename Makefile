@@ -21,6 +21,9 @@ $(TISCOMP_T): $(TISCOMP_O)
 $(MAIN)/savetest.exe: $(MAIN)/savetest.o $(MAIN)/save.tab.o $(MAIN)/save.yy.o $(MAIN)/save.o
 	$(CXX) -o $@ $(CXXFLAGS) $(LDFLAGS) $(MAIN)/savetest.o $(MAIN)/save.tab.o $(MAIN)/save.yy.o $(MAIN)/save.o
 
+$(MAIN)/tisvm.exe: $(MAIN)/tisvm.o $(MAIN)/node.o
+	$(CXX) -o $@ $(CXXFLAGS) $(LDFLAGS) $(MAIN)/tisvm.o $(MAIN)/node.o
+
 clean:
 	$(RM) $(TISCOMP_T) $(TISCOMP_O) $(MAIN)/save.tab.cpp $(MAIN)/save.tab.h $(MAIN)/save.yy.cpp \
         $(MAIN)/save.o $(MAIN)/save.yy.o $(MAIN)/save.tab.o $(MAIN)/savetest.o $(MAIN)/savetest.exe
@@ -42,3 +45,4 @@ clean:
 
 $(MAIN)/save.yy.o : $(MAIN)/save.tab.h $(MAIN)/save.hpp
 $(MAIN)/save.tab.o  $(MAIN)/save.o : $(MAIN)/save.hpp
+$(MAIN)/tisvm.o $(MAIN)/node.o : $(MAIN)/node.hpp
