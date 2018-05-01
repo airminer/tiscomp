@@ -1,10 +1,8 @@
 #include <vector>
 #include "node.hpp"
 
-int test = 0;
 bool Node::read(int  &dest) {
-	dest = test++;
-	return true;
+	return false;
 }
 
 void Node::step() {}
