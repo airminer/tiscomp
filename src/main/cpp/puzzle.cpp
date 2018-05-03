@@ -19,7 +19,7 @@ void setint(lua_State *L, const char* s, lua_Integer i) {
 	lua_setfield(L, -2, s);
 }
 
-Puzzle puzzle_parser(char* file) {
+Puzzle puzzle_parser(const char* file) {
 	Puzzle ret;
 	lua_State *L;
 

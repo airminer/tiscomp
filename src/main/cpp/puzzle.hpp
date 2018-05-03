@@ -1,3 +1,6 @@
+#ifndef PUZZLE_HPP
+#define PUZZLE_HPP
+
 #include <vector>
 
 enum TIS_TILE {
@@ -27,4 +30,6 @@ struct Puzzle {
 	Puzzle();
 };
 
-Puzzle puzzle_parser(char* file);
+Puzzle puzzle_parser(const char* file);
+
+#endif // !PUZZLE_HPP

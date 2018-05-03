@@ -1,3 +1,6 @@
+#ifndef SAVE_HPP
+#define SAVE_HPP
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -67,3 +70,5 @@ void pushInstr2(const int, const int, const int);
 
 void startCore();
 void endCore();
+
+#endif // !SAVE_HPP

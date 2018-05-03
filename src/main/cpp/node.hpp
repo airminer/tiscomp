@@ -1,3 +1,6 @@
+#ifndef NODE_HPP
+#define NODE_HPP
+
 #include <stdio.h>
 #include <string>
 #include <vector>
@@ -51,3 +54,5 @@ public:
 	OutStream(FILE *file);
 	void step() override;
 };
+
+#endif // !NODE_HPP
