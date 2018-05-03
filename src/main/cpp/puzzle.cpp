@@ -258,7 +258,7 @@ Puzzle puzzle_parser(char* file) {
 
 	}
 
-	lua_settop(L, 0);
+	free(L);
 
 	return ret;
 }
