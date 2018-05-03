@@ -1,8 +1,9 @@
 #include <unordered_map>
 #include <vector>
 #include <algorithm>
-#include <cctype>
-#include <cstring>
+#include <ctype.h>
+#include <string.h>
+#include <stdarg.h>
 #include "save.hpp"
 #include "save.tab.h"
 
@@ -14,14 +15,32 @@ std::unordered_map<std::string, int> labels;
 std::vector<std::string> floating;
 std::unordered_map<std::string, std::vector<Instr*>> unresolved;
 
-
 std::vector<Core*> cores;
 Core* core = NULL;
 
+void lineerror(int line, const char *s, ...) {
+	fprintf(stderr, "Parse error at line %d: ", line);
+
+	va_list argptr;
+	va_start(argptr, s);
+	vfprintf(stderr, s, argptr);
+	va_end(argptr);
+}
+
+void yyerror(const char *s, ...) {
+	fprintf(stderr, "Parse error at line %d: ", linenum);
+
+	va_list argptr;
+	va_start(argptr, s);
+	vfprintf(stderr, s, argptr);
+	va_end(argptr);
+
+	// might as well halt now:
+	exit(1);
+}
+
 Instr::Instr(const int line, const int type, const int src, const int dest, const int label) : line(line),  type(type), src(src), dest(dest), label(label) {}
 Core::Core(const int corenum) : corenum(corenum) {}
-
-Stream::Stream(const int type) : type(type) {}
 
 void pushLabel(char* lc) {
 	std::string l(lc);

@@ -45,29 +45,14 @@ struct Core {
 	Core(const int);
 };
 
-enum TIS_TILE {
-	TILE_COMPUTE = 1000,
-	TILE_MEMORY = 1001,
-	TILE_DAMAGED = 1002,
-	TILE_JOURNAL = 1003
-};
-
-enum TIS_STREAM {
-	STREAM_INPUT = 2000,
-	STREAM_OUTPUT = 2001,
-	STREAM_IMAGE = 2002
-};
-
-struct Stream {
-	int type;
-	std::vector<int> data;
-	Stream(const int);
-};
-
 extern "C" int yylex();
 extern "C" int yyparse();
 
-extern int corenum, instrn, linenum;
+extern int yydebug, corenum, instrn, linenum;
+
+extern FILE *yyin;
+
+extern std::vector<Core*> cores;
 
 void yyerror(const char*, ...);
 void lineerror(int, const char*, ...);

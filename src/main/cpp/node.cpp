@@ -81,6 +81,7 @@ void OutStream::step() {
 			errors++;
 		}
 		eof = fscanf(file, "%d", &exp) != 1;
-		complete = eof && errors == 0;
 	}
+	//complete = eof && errors == 0;
+	complete = eof;
 }

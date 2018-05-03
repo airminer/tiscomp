@@ -1,7 +1,6 @@
 #include <vector>
 #include "node.hpp"
 
-
 Node *nil;
 Node *array[20];
 
