@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
 	// make sure it's valid:
 	if (!myfile) {
 		fprintf(stderr, "Couldn't load save file: %s\n", save);
-		return 1;
+		exit(1);
 	}
 	// set flex to read from it instead of defaulting to STDIN:
 	yyin = myfile;
@@ -106,6 +106,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	fpga_backend(puzzle, renum, stack);
+	software_backend(puzzle, renum, stack);
 
     return 0;
 }

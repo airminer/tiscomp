@@ -3,3 +3,4 @@
 *.yy.cpp
 *.o
 *.exe
+src/main/cpp/tisprog.cpp

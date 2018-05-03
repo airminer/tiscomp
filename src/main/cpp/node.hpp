@@ -8,17 +8,26 @@
 class Node {
 public:
 	Node *left, *right, *up, *down;
-	virtual bool read(int &dest);
+	virtual bool read(int &dest, Node *reader);
 	virtual void step();
 	virtual void end();
 };
 
-class Core : public Node {
-	bool write, nwrite;
-	int out, nout;
+class Proc : public Node {
+protected:
+	bool write, nwrite, writec;
+	Node *wdest, *nwdest, *last;
+	int out, nout, acc, bak;
+	int pc, instrn;
+	void swp();
+	bool readFrom(int &dest, Node *source);
+	void add(const int i);
+	void sub(const int i);
+	void jro(const int i);
+	void mov(const int i, Node* target);
 public:
-	Core();
-	bool read(int &dest) override;
+	Proc(int instrn);
+	bool read(int &dest, Node* reader) override;
 	void end() override;
 };
 
@@ -28,7 +37,7 @@ class Stack : public Node {
 	std::vector<int> stack;
 public:
 	Stack();
-	bool read(int &dest) override;
+	bool read(int &dest, Node* reader) override;
 	void step() override;
 	void end() override;
 };
@@ -42,7 +51,7 @@ protected:
 class InStream : public StreamNode {
 public:
 	InStream(FILE *file);
-	bool read(int &dest) override;
+	bool read(int &dest, Node* reader) override;
 };
 
 class OutStream : public StreamNode {

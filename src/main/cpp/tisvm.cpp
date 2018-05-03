@@ -1,5 +1,6 @@
 #include <vector>
 #include "node.hpp"
+#include "tisvm.hpp"
 
 Node *nil;
 Node *array[20];
@@ -14,7 +15,7 @@ void init_array() {
 	}
 }
 
-void insert_node(int i, Node *n) {
+void insert_node(const int i, Node *n) {
 	array[i + 4] = n;
 	if (i % 4 == 0) {
 		n->left = nil;
@@ -43,7 +44,7 @@ void insert_node(int i, Node *n) {
 	nodes.push_back(n);
 }
 
-void insert_inStream(int i, InStream *s) {
+void insert_inStream(const int i, InStream *s) {
 	array[i] = s;
 	s->down = array[i + 4];
 	if (array[i + 4] != nil) {
@@ -51,7 +52,7 @@ void insert_inStream(int i, InStream *s) {
 	}
 }
 
-void insert_outStream(int i, OutStream *s) {
+void insert_outStream(const int i, OutStream *s) {
 	array[i + 16] = s;
 	s->up = array[i + 12];
 	if (array[i + 12] != nil) {

@@ -11,7 +11,7 @@ RM= rm -f
 SED= sed
 
 TISCOMP_T=$(MAIN)/tiscomp.exe
-TISCOMP_O=$(MAIN)/tiscomp.o $(MAIN)/puzzle.o $(MAIN)/save.tab.o $(MAIN)/save.yy.o $(MAIN)/save.o $(MAIN)/fpga.o
+TISCOMP_O=$(MAIN)/tiscomp.o $(MAIN)/puzzle.o $(MAIN)/save.tab.o $(MAIN)/save.yy.o $(MAIN)/save.o $(MAIN)/fpga.o $(MAIN)/software.o
 
 all: $(TISCOMP_T)
 
@@ -21,8 +21,8 @@ $(TISCOMP_T): $(TISCOMP_O)
 $(MAIN)/savetest.exe: $(MAIN)/savetest.o $(MAIN)/save.tab.o $(MAIN)/save.yy.o $(MAIN)/save.o
 	$(CXX) -o $@ $(CXXFLAGS) $(LDFLAGS) $(MAIN)/savetest.o $(MAIN)/save.tab.o $(MAIN)/save.yy.o $(MAIN)/save.o
 
-$(MAIN)/tisvm.exe: $(MAIN)/tisvm.o $(MAIN)/node.o
-	$(CXX) -o $@ $(CXXFLAGS) $(LDFLAGS) $(MAIN)/tisvm.o $(MAIN)/node.o
+$(MAIN)/tisprog.exe: $(MAIN)/tisprog.o $(MAIN)/tisvm.o $(MAIN)/node.o
+	$(CXX) -o $@ $(CXXFLAGS) $(LDFLAGS) $(MAIN)/tisprog.o $(MAIN)/tisvm.o $(MAIN)/node.o
 
 clean:
 	$(RM) $(TISCOMP_T) $(TISCOMP_O) $(MAIN)/save.tab.cpp $(MAIN)/save.tab.h $(MAIN)/save.yy.cpp \
@@ -43,8 +43,10 @@ clean:
 
 .SUFFIXES:
 
-$(MAIN)/tiscomp.o $(MAIN)/fpga.o : $(MAIN)/puzzle.hpp $(MAIN)/node.hpp $(MAIN)/backend.hpp
+$(MAIN)/tiscomp.o $(MAIN)/fpga.o $(MAIN)/software.o : $(MAIN)/puzzle.hpp $(MAIN)/node.hpp $(MAIN)/backend.hpp
 $(MAIN)/puzzle.o : $(MAIN)/puzzle.hpp
 $(MAIN)/save.yy.o : $(MAIN)/save.tab.h $(MAIN)/save.hpp
 $(MAIN)/save.tab.o  $(MAIN)/save.o : $(MAIN)/save.hpp
-$(MAIN)/tisvm.o $(MAIN)/node.o : $(MAIN)/node.hpp
+
+$(MAIN)/tisprog.o $(MAIN)/tisvm.o : $(MAIN)/tisvm.hpp $(MAIN)/node.hpp
+$(MAIN)/node.o : $(MAIN)/node.hpp
