@@ -105,8 +105,11 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
+	printf("\n");
+
 	fpga_backend(puzzle, renum, stack);
 	software_backend(puzzle, renum, stack);
+	refimpl_backend(puzzle, renum, stack);
 
     return 0;
 }

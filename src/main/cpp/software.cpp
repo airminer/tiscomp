@@ -36,7 +36,7 @@ const char* getInstrStr(const int i) {
 void software_backend(const Puzzle &puzzle, const std::vector<Core*> &renum, const Core *stack) {
 	FILE *output = fopen("src/main/cpp/tisprog.cpp", "w");
 	if (!output) {
-		fprintf(stderr, "Couldn't open file: src/main/cpp / tisprog.cpp");
+		fprintf(stderr, "Couldn't open file: src/main/cpp/tisprog.cpp");
 		exit(1);
 	}
 

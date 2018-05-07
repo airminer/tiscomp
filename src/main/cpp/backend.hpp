@@ -6,5 +6,6 @@
 
 void fpga_backend(const Puzzle &puzzle, const std::vector<Core*> &renum, const Core *stack);
 void software_backend(const Puzzle &puzzle, const std::vector<Core*> &renum, const Core *stack);
+void refimpl_backend(const Puzzle &puzzle, const std::vector<Core*> &renum, const Core *stack);
 
 #endif // !BACKEND_HPP

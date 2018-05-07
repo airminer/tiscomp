@@ -11,7 +11,7 @@ RM= rm -f
 SED= sed
 
 TISCOMP_T=$(MAIN)/tiscomp.exe
-TISCOMP_O=$(MAIN)/tiscomp.o $(MAIN)/puzzle.o $(MAIN)/save.tab.o $(MAIN)/save.yy.o $(MAIN)/save.o $(MAIN)/fpga.o $(MAIN)/software.o
+TISCOMP_O=$(MAIN)/tiscomp.o $(MAIN)/puzzle.o $(MAIN)/save.tab.o $(MAIN)/save.yy.o $(MAIN)/save.o $(MAIN)/fpga.o $(MAIN)/software.o $(MAIN)/refimpl.o
 
 all: $(TISCOMP_T)
 
@@ -43,7 +43,7 @@ clean:
 
 .SUFFIXES:
 
-$(MAIN)/tiscomp.o $(MAIN)/fpga.o $(MAIN)/software.o : $(MAIN)/puzzle.hpp $(MAIN)/node.hpp $(MAIN)/backend.hpp
+$(MAIN)/tiscomp.o $(MAIN)/fpga.o $(MAIN)/software.o $(MAIN)/refimpl.o : $(MAIN)/puzzle.hpp $(MAIN)/node.hpp $(MAIN)/backend.hpp
 $(MAIN)/puzzle.o : $(MAIN)/puzzle.hpp
 $(MAIN)/save.yy.o : $(MAIN)/save.tab.h $(MAIN)/save.hpp
 $(MAIN)/save.tab.o  $(MAIN)/save.o : $(MAIN)/save.hpp
