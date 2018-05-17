@@ -24,9 +24,14 @@ $(MAIN)/savetest.exe: $(MAIN)/savetest.o $(MAIN)/save.tab.o $(MAIN)/save.yy.o $(
 $(MAIN)/tisprog.exe: $(MAIN)/tisprog.o $(MAIN)/tisvm.o $(MAIN)/node.o
 	$(CXX) -o $@ $(CXXFLAGS) $(LDFLAGS) $(MAIN)/tisprog.o $(MAIN)/tisvm.o $(MAIN)/node.o
 
-clean:
+cleanoutput:
+	$(RM) in[0-3].txt out[0-3].txt prog.txt len.txt refimpl.sys refimpl.tis save.txt slen.txt stack.txt streams.txt test.lua \
+        $(MAIN)/tisprog.cpp
+
+clean: cleanoutput
 	$(RM) $(TISCOMP_T) $(TISCOMP_O) $(MAIN)/save.tab.cpp $(MAIN)/save.tab.h $(MAIN)/save.yy.cpp \
-        $(MAIN)/save.o $(MAIN)/save.yy.o $(MAIN)/save.tab.o $(MAIN)/savetest.o $(MAIN)/savetest.exe
+        $(MAIN)/savetest.o $(MAIN)/savetest.exe \
+		$(MAIN)/tisprog.o $(MAIN)/tisprog.exe $(MAIN)/tisvm.o $(MAIN)/node.o \
 
 %.o: %.cpp
 	$(CXX) -o $@ $(CPPFLAGS) $(CXXFLAGS) -c $*.cpp
@@ -37,7 +42,7 @@ clean:
 %.yy.cpp: %.l
 	 $(FLEX) -o $@ $*.l
 
-.PHONY: all clean depend
+.PHONY: all cleanoutput clean
 
 .PRECIOUS: %.tab.cpp %.yy.cpp
 

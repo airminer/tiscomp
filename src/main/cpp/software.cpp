@@ -60,10 +60,24 @@ void software_backend(const Puzzle &puzzle, const std::vector<Core*> &renum, con
 				switch (instr->type) {
 				case MOV:
 					if (instr->dest == NIL) {
-						fprintf(output, "{int i; if(readFrom(i, %s))  pc = %d; }", getSrcStr(instr->src), (j + 1) % instrn);
+						switch (instr->src) {
+						case ANY: case LAST:
+						case LEFT: case RIGHT: case UP: case DOWN:
+							fprintf(output, "{int i; if(readFrom(i, %s))  pc = %d; }", getSrcStr(instr->src), (j + 1) % instrn); break;
+						default:
+							fprintf(output, "pc = %d;", (j + 1) % instrn);
+						}
 						break;
 					} else if (instr->dest == ACC) {
-						fprintf(output, "if(readFrom(acc, %s))  pc = %d;", getSrcStr(instr->src), (j + 1) % instrn);
+						switch (instr->src) {
+						case ANY: case LAST:
+						case LEFT: case RIGHT: case UP: case DOWN:
+							fprintf(output, "if(readFrom(acc, %s))  pc = %d;", getSrcStr(instr->src), (j + 1) % instrn); break;
+						default:
+							fprintf(output, "acc = ");
+							fprintf(output, getSrcStr(instr->src), instr->src);
+							fprintf(output, ";  pc = %d;", (j + 1) % instrn);
+						}
 						break;
 					} else
 						fprintf(output, "if(!write && !writec) ");
@@ -81,7 +95,7 @@ void software_backend(const Puzzle &puzzle, const std::vector<Core*> &renum, con
 						break;
 					}
 					fprintf(output, getInstrStr(instr->type), getSrcStr(instr->dest));
-					if(instr->type != MOV)
+					if(instr->type != MOV && instr->type != JRO)
 						fprintf(output, " pc = %d;", (j + 1) % instrn);
 					fprintf(output, " }}");
 					break;
