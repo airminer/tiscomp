@@ -1,0 +1,36 @@
+@0
+
+
+@1
+MOV UP, DOWN
+
+@2
+
+
+@3
+
+
+@4
+MOV 0, LEFT
+L:MOV UP ACC
+MOV ACC, LEFT
+JNZ L
+MOV LEFT, NIL
+L2:MOV LEFT, ACC
+MOV ACC, RIGHT
+JNZ L2
+
+@5
+MOV LEFT, DOWN
+
+@6
+
+
+@7
+
+
+@8
+
+
+@9
+MOV UP, DOWN

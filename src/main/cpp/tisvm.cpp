@@ -1,3 +1,4 @@
+#include <chrono>
 #include <vector>
 #include "node.hpp"
 #include "tisvm.hpp"
@@ -8,7 +9,13 @@ Node *array[20];
 std::vector<Node*> nodes;
 std::vector<OutStream*> outStreams;
 
+int stepcount;
+std::chrono::time_point<std::chrono::high_resolution_clock> begin;
+
 void init_array() {
+	begin = std::chrono::high_resolution_clock::now();
+	stepcount = 0;
+
 	nil = new Node();
 	for (int i = 0; i < 20; i++) {
 		array[i] = nil;
@@ -80,5 +87,9 @@ void run() {
 				n->end();
 			}
 		}
+		stepcount++;
 	}
+	std::chrono::time_point<std::chrono::high_resolution_clock> end = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> elapsed = (end - begin) * 1000.0;
+	printf("\nClock cycles computed: %d\nElapsed milliseconds: %f", stepcount, elapsed.count());
 }
