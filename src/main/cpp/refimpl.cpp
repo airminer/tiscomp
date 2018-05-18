@@ -35,15 +35,15 @@ void refimpl_backend(const Puzzle &puzzle, const std::vector<Core*> &renum, cons
 			case SWP: fprintf(program, "SWP\n"); break;
 			case SAV: fprintf(program, "SAV\n"); break;
 			case NEG: fprintf(program, "NEG\n"); break;
-			case ADD: fprintf(program, "ADD "); fprintf(program, getSrc(c->instr[i]->src), i); fprintf(program, "\n"); break;
-			case SUB: fprintf(program, "SUB "); fprintf(program, getSrc(c->instr[i]->src), i); fprintf(program, "\n"); break;
-			case JRO: fprintf(program, "JRO "); fprintf(program, getSrc(c->instr[i]->src), i); fprintf(program, "\n"); break;
+			case ADD: fprintf(program, "ADD "); fprintf(program, getSrc(c->instr[i]->src), c->instr[i]->src); fprintf(program, "\n"); break;
+			case SUB: fprintf(program, "SUB "); fprintf(program, getSrc(c->instr[i]->src), c->instr[i]->src); fprintf(program, "\n"); break;
+			case JRO: fprintf(program, "JRO "); fprintf(program, getSrc(c->instr[i]->src), c->instr[i]->src); fprintf(program, "\n"); break;
 			case JMP: fprintf(program, "JMP %d\n", c->instr[i]->label); break;
 			case JEZ: fprintf(program, "JEZ %d\n", c->instr[i]->label); break;
 			case JNZ: fprintf(program, "JNZ %d\n", c->instr[i]->label); break;
 			case JGZ: fprintf(program, "JGZ %d\n", c->instr[i]->label); break;
 			case JLZ: fprintf(program, "JLZ %d\n", c->instr[i]->label); break;
-			case MOV: fprintf(program, "MOV "); fprintf(program, getSrc(c->instr[i]->src), i); fprintf(program, " "); fprintf(program, getSrc(c->instr[i]->dest), i); fprintf(program, "\n"); break;
+			case MOV: fprintf(program, "MOV "); fprintf(program, getSrc(c->instr[i]->src), c->instr[i]->src); fprintf(program, " "); fprintf(program, getSrc(c->instr[i]->dest), c->instr[i]->dest); fprintf(program, "\n"); break;
 			}
 			i++;
 		}
