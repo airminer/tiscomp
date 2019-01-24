@@ -27,7 +27,7 @@ void fpga_backend(const Puzzle &puzzle, const std::vector<Core*> &renum, const C
 	}
 
 	for (Core* c : renum) {
-		fprintf(lentxt, "%lX\n", c->instr.size());
+		fprintf(lentxt, "%zX\n", c->instr.size());
 		fprintf(stacktxt, (c == stack) ? "1\n" : "0\n");
 		size_t i = 0;
 		while (i < c->instr.size()) {
@@ -76,7 +76,7 @@ void fpga_backend(const Puzzle &puzzle, const std::vector<Core*> &renum, const C
 	}
 
 	for (Stream s : puzzle.inStreams) {
-		fprintf(slentxt, "%02lX\n", s.data.size());
+		fprintf(slentxt, "%02zX\n", s.data.size());
 		size_t i = 0;
 		while (i < s.data.size()) {
 			fprintf(streamstxt, "%03X\n", s.data[i] & 0x7FF);
@@ -88,7 +88,7 @@ void fpga_backend(const Puzzle &puzzle, const std::vector<Core*> &renum, const C
 		}
 	}
 	for (Stream s : puzzle.outStreams) {
-		fprintf(slentxt, "%02lX\n", s.data.size());
+		fprintf(slentxt, "%02zX\n", s.data.size());
 		size_t i = 0;
 		while (i < s.data.size()) {
 			fprintf(streamstxt, "%03X\n", s.data[i] & 0x7FF);

@@ -136,7 +136,7 @@ Puzzle puzzle_parser(const char* file) {
 	size_t l;
 
 	if ((l = lua_rawlen(L, -1)) != 12) {
-		fprintf(stderr, "Failed to get layout: get_layout() returned a table of length %ld\n", l);
+		fprintf(stderr, "Failed to get layout: get_layout() returned a table of length %zu\n", l);
 		exit(1);
 	}
 
@@ -150,7 +150,7 @@ Puzzle puzzle_parser(const char* file) {
 		lua_remove(L, -1);
 
 		if (tile < TILE_COMPUTE || tile > TILE_JOURNAL) {
-			fprintf(stderr, "Failed to get layout: element %d of get_layout() is not a valid tile value(%ld)\n", i, tile);
+			fprintf(stderr, "Failed to get layout: element %d of get_layout() is not a valid tile value(%td)\n", i, tile);
 			exit(1);
 		}
 
@@ -187,7 +187,7 @@ Puzzle puzzle_parser(const char* file) {
 		size_t len;
 
 		if ((len = lua_rawlen(L, -1)) != 4) {
-			fprintf(stderr, "Failed to get streams: element %d of get_streams() is of length %ld\n", i, len);
+			fprintf(stderr, "Failed to get streams: element %d of get_streams() is of length %zu\n", i, len);
 			exit(1);
 		}
 
@@ -199,7 +199,7 @@ Puzzle puzzle_parser(const char* file) {
 
 		lua_Integer type = lua_tointeger(L, -1);
 		if (type < STREAM_INPUT || type > STREAM_OUTPUT) {
-			fprintf(stderr, "Failed to get streams: element %d of get_streams() is not a valid stream type(%ld)\n", i, type);
+			fprintf(stderr, "Failed to get streams: element %d of get_streams() is not a valid stream type(%td)\n", i, type);
 			exit(1);
 		}
 
@@ -213,7 +213,7 @@ Puzzle puzzle_parser(const char* file) {
 
 		lua_Integer pos = lua_tointeger(L, -1);
 		if (pos < 0 || pos > 3) {
-			fprintf(stderr, "Failed to get streams: element %d of get_streams() is not a valid position(%ld)\n", i, pos);
+			fprintf(stderr, "Failed to get streams: element %d of get_streams() is not a valid position(%td)\n", i, pos);
 			exit(1);
 		}
 
@@ -227,7 +227,7 @@ Puzzle puzzle_parser(const char* file) {
 
 		len = lua_rawlen(L, -1);
 		if (len > 39) {
-			fprintf(stderr, "Failed to get streams: element 4 of get_streams()[%d] is longer than 39 elements (%ld)\n", i, len);
+			fprintf(stderr, "Failed to get streams: element 4 of get_streams()[%d] is longer than 39 elements (%zu)\n", i, len);
 			exit(1);
 		}
 
@@ -240,7 +240,7 @@ Puzzle puzzle_parser(const char* file) {
 
 			lua_Integer val = lua_tointeger(L, -1);
 			if (val < -999 || val > 999) {
-				fprintf(stderr, "Failed to get streams: element %d of get_streams()[%d][4] is not a valid value(%ld)\n", j, i, val);
+				fprintf(stderr, "Failed to get streams: element %d of get_streams()[%d][4] is not a valid value(%td)\n", j, i, val);
 				exit(1);
 			}
 			lua_remove(L, -1);

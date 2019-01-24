@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
 	if (puzzle.compute.size() > 0) {
 		printf("Compute tiles:\n0:%d", puzzle.compute[0]);
 		for (size_t i = 1; i < puzzle.compute.size(); i++) {
-			printf(" %ld:%d", i, puzzle.compute[i]);
+			printf(" %zu:%d", i, puzzle.compute[i]);
 		}
 		printf("\n");
 	}
@@ -85,7 +85,7 @@ int main(int argc, char* argv[]) {
 	printf("\n");
 
 	for (Core* c : renum) {
-		printf("Core %d: length: %ld\n", c->corenum, c->instr.size());
+		printf("Core %d: length: %zu\n", c->corenum, c->instr.size());
 		for (unsigned int i = 0; i < c->instr.size(); i++) {
 			switch (c->instr[i]->type) {
 			case NOP: printf("NOP\n"); break;
