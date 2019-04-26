@@ -10,7 +10,7 @@ FLEX=flex
 RM= rm -f
 SED= sed
 
-TISCOMP_T=$(MAIN)/tiscomp.exe
+TISCOMP_T=$(MAIN)/tiscomp
 TISCOMP_O=$(MAIN)/tiscomp.o $(MAIN)/puzzle.o $(MAIN)/save.tab.o $(MAIN)/save.yy.o $(MAIN)/save.o $(MAIN)/fpga.o $(MAIN)/software.o $(MAIN)/refimpl.o
 
 all: $(TISCOMP_T)
@@ -18,10 +18,10 @@ all: $(TISCOMP_T)
 $(TISCOMP_T): $(TISCOMP_O)
 	$(CXX) -o $@ $(CXXFLAGS) $(LDFLAGS) $(TISCOMP_O) $(LIBS)
 
-$(MAIN)/savetest.exe: $(MAIN)/savetest.o $(MAIN)/save.tab.o $(MAIN)/save.yy.o $(MAIN)/save.o
+$(MAIN)/savetest: $(MAIN)/savetest.o $(MAIN)/save.tab.o $(MAIN)/save.yy.o $(MAIN)/save.o
 	$(CXX) -o $@ $(CXXFLAGS) $(LDFLAGS) $(MAIN)/savetest.o $(MAIN)/save.tab.o $(MAIN)/save.yy.o $(MAIN)/save.o
 
-$(MAIN)/tisprog.exe: $(MAIN)/tisprog.o $(MAIN)/tisvm.o $(MAIN)/node.o
+$(MAIN)/tisprog: $(MAIN)/tisprog.o $(MAIN)/tisvm.o $(MAIN)/node.o
 	$(CXX) -o $@ $(CXXFLAGS) $(LDFLAGS) $(MAIN)/tisprog.o $(MAIN)/tisvm.o $(MAIN)/node.o
 
 cleanoutput:
@@ -30,8 +30,8 @@ cleanoutput:
 
 clean: cleanoutput
 	$(RM) $(TISCOMP_T) $(TISCOMP_O) $(MAIN)/save.tab.cpp $(MAIN)/save.tab.h $(MAIN)/save.yy.cpp \
-        $(MAIN)/savetest.o $(MAIN)/savetest.exe \
-		$(MAIN)/tisprog.o $(MAIN)/tisprog.exe $(MAIN)/tisvm.o $(MAIN)/node.o \
+        $(MAIN)/savetest.o $(MAIN)/savetest \
+		$(MAIN)/tisprog.o $(MAIN)/tisprog $(MAIN)/tisvm.o $(MAIN)/node.o \
 
 %.o: %.cpp
 	$(CXX) -o $@ $(CPPFLAGS) $(CXXFLAGS) -c $*.cpp
